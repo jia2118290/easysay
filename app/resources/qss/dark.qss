@@ -1,0 +1,188 @@
+/* ============================================================
+   EasySay 视觉主题 —— "录音棚"设计方向
+   色彩来自专业音频设备语言：暖调炭灰机身 + 琥珀色录音指示灯
+   ============================================================ */
+
+/* ---------- 色彩变量说明（QSS 不支持 CSS 变量，此处仅作注释留存设计 token） ----------
+   背景基色      bg-base        #1B1D22
+   面板/卡片     bg-surface     #24262C
+   输入框背景    bg-input       #2C2F37
+   描边/分割线   border         #3A3D46
+   主强调色      accent-amber   #E8A33D
+   强调色-hover  accent-hover   #F2B458
+   成功/次要色   accent-teal    #4FBFA0
+   错误色        error-red      #E5484D
+   主文字        text-primary   #F2F1EE
+   次要文字      text-secondary #9C9FA8
+   弱化文字      text-muted     #6C6F78
+------------------------------------------------------------------------------ */
+
+* {
+    font-family: "PingFang SC", "Microsoft YaHei UI", "Segoe UI", "Noto Sans CJK SC", sans-serif;
+    font-size: 12.5pt;
+    color: #F2F1EE;
+}
+
+QMainWindow, QWidget {
+    background-color: #1B1D22;
+}
+
+QMenuBar {
+    background-color: #1B1D22;
+    border-bottom: 1px solid #3A3D46;
+    padding: 2px;
+}
+QMenuBar::item {
+    background: transparent;
+    padding: 4px 10px;
+    border-radius: 4px;
+}
+QMenuBar::item:selected {
+    background-color: #2C2F37;
+}
+QMenu {
+    background-color: #24262C;
+    border: 1px solid #3A3D46;
+    border-radius: 6px;
+    padding: 4px;
+}
+QMenu::item {
+    padding: 6px 20px;
+    border-radius: 4px;
+}
+QMenu::item:selected {
+    background-color: #2C2F37;
+    color: #E8A33D;
+}
+
+/* ---------- 分组卡片：小节标题（① 音色设置 等） ---------- */
+QGroupBox {
+    background-color: #24262C;
+    border: 1px solid #3A3D46;
+    border-radius: 10px;
+    margin-top: 14px;
+    padding-top: 16px;
+    padding: 16px 14px 14px 14px;
+}
+QGroupBox::title {
+    subcontrol-origin: margin;
+    subcontrol-position: top left;
+    left: 14px;
+    top: -2px;
+    padding: 0 6px;
+    font-weight: 600;
+    font-size: 10.5pt;
+    letter-spacing: 1px;
+    color: #9C9FA8;
+    background-color: #1B1D22;
+}
+
+/* ---------- 常规标签 ---------- */
+QLabel {
+    background: transparent;
+    color: #F2F1EE;
+}
+QLabel#fieldLabel {
+    color: #9C9FA8;
+    font-size: 11pt;
+}
+QLabel#voice_desc_label {
+    color: #4FBFA0;
+    font-size: 11pt;
+    padding: 2px 0;
+}
+QLabel#copyright_label {
+    font-size: 9.5pt;
+    color: #6C6F78;
+}
+QLabel#status_label {
+    font-size: 10.5pt;
+    color: #9C9FA8;
+}
+
+/* ---------- 输入控件 ---------- */
+QComboBox, QLineEdit, QTextEdit {
+    background-color: #2C2F37;
+    border: 1px solid #3A3D46;
+    border-radius: 6px;
+    padding: 6px 8px;
+    selection-background-color: #E8A33D;
+    selection-color: #1B1D22;
+}
+QComboBox:focus, QLineEdit:focus, QTextEdit:focus {
+    border: 1px solid #E8A33D;
+}
+QComboBox::drop-down {
+    border: none;
+    width: 24px;
+}
+QComboBox QAbstractItemView {
+    background-color: #24262C;
+    border: 1px solid #3A3D46;
+    selection-background-color: #E8A33D;
+    selection-color: #1B1D22;
+    outline: none;
+}
+QLineEdit:disabled, QComboBox:disabled {
+    color: #6C6F78;
+    background-color: #24262C;
+}
+
+/* 数据字段：语速 / 文件名，使用等宽字体，呼应"仪表读数"质感 */
+QLineEdit#rateEdit, QLineEdit#dirEdit {
+    font-family: "JetBrains Mono", "Cascadia Mono", "SF Mono", "Consolas", monospace;
+    font-size: 11pt;
+    color: #E8A33D;
+}
+
+/* ---------- 按钮：主操作 vs 次要操作分级 ---------- */
+QPushButton {
+    font-weight: 600;
+    background-color: #E8A33D;
+    color: #1B1D22;
+    border-radius: 6px;
+    padding: 9px 16px;
+    border: none;
+}
+QPushButton:hover {
+    background-color: #F2B458;
+}
+QPushButton:pressed {
+    background-color: #D6912E;
+}
+QPushButton:disabled {
+    background-color: #3A3D46;
+    color: #6C6F78;
+}
+
+/* 次要按钮（如"选择输出目录"）：幽灵描边风格，弱化次要操作 */
+QPushButton#secondaryButton {
+    background-color: transparent;
+    color: #F2F1EE;
+    border: 1px solid #3A3D46;
+    font-weight: 500;
+}
+QPushButton#secondaryButton:hover {
+    border-color: #E8A33D;
+    color: #E8A33D;
+    background-color: rgba(232, 163, 61, 0.08);
+}
+
+/* 主生成按钮：加大字号，作为整个界面的视觉锚点 */
+QPushButton#generateButton {
+    font-size: 13.5pt;
+    padding: 12px 16px;
+}
+
+/* ---------- 进度条（备用，均衡器动画为主展示） ---------- */
+QProgressBar {
+    border-radius: 4px;
+    height: 8px;
+    background: #2C2F37;
+    text-align: center;
+    border: none;
+}
+QProgressBar::chunk {
+    background: #E8A33D;
+    border-radius: 4px;
+}
