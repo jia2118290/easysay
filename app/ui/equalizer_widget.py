@@ -16,7 +16,7 @@ from PySide6.QtWidgets import QWidget
 
 
 class EqualizerWidget(QWidget):
-    BAR_COUNT = 5
+    BAR_COUNT = 10
     ACCENT = QColor("#E8A33D")
     ACCENT_DIM = QColor("#3A3D46")
 

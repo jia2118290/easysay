@@ -94,6 +94,11 @@ QLabel#voice_desc_label {
     font-size: 11pt;
     padding: 2px 0;
 }
+QLabel#charCountLabel {
+    font-size: 9pt;
+    color: #6C6F78;
+    padding: 0px 2px;
+}
 QLabel#copyright_label {
     font-size: 9.5pt;
     color: #6C6F78;
