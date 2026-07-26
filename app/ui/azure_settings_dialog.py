@@ -36,7 +36,11 @@ AZURE_REGIONS = [
 class AzureSettingsDialog(QDialog):
     def __init__(self, parent=None):
         super().__init__(parent)
-        self.settings = SettingsManager()
+        # 复用父窗口的 SettingsManager，确保配置全局一致
+        if parent and hasattr(parent, 'settings'):
+            self.settings = parent.settings
+        else:
+            self.settings = SettingsManager()
         self.setWindowTitle("Azure 语音服务设置")
         self.setFixedSize(420, 260)
 

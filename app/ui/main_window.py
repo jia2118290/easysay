@@ -134,7 +134,7 @@ class MainWindow(QMainWindow):
         self.tab_widget.addTab(tts_widget, "文本转语音")
 
         # --- 标签页 2：对比读 ---
-        self.compare_widget = CompareModeWidget(media_player=self._media_player)
+        self.compare_widget = CompareModeWidget(media_player=self._media_player, parent=self)
         self.tab_widget.addTab(self.compare_widget, "对比读")
 
         layout.addWidget(self.tab_widget, stretch=1)

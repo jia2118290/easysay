@@ -75,3 +75,17 @@ def ffmpeg_path() -> str:
             return str(base / "ffmpeg" / "ffmpeg.exe")
         return str(base / "ffmpeg" / "ffmpeg")
     return "ffmpeg"
+
+
+def ffprobe_path() -> str:
+    """
+    返回 pydub 可用的 ffprobe 二进制路径。
+    - 打包后：ffprobe 随包打入 _MEIPASS，从这里解析
+    - 开发环境：直接用系统 PATH 中的 ffprobe
+    """
+    if hasattr(sys, "_MEIPASS"):
+        base = Path(sys._MEIPASS)  # type: ignore[attr-defined]
+        if sys.platform == "win32":
+            return str(base / "ffmpeg" / "ffprobe.exe")
+        return str(base / "ffmpeg" / "ffprobe")
+    return "ffprobe"

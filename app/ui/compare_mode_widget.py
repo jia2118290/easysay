@@ -38,6 +38,11 @@ class CompareModeWidget(QWidget):
         super().__init__(parent)
         self._media_player = media_player
         self.settings = SettingsManager()
+        # 确保主窗口与对比读共用同一个 SettingsManager 实例
+        if parent:
+            parent_settings = getattr(parent, "settings", None)
+            if parent_settings:
+                self.settings = parent_settings
 
         self.sentences: list[str] = []
         self.scores: dict[int, dict] = {}
@@ -450,6 +455,7 @@ class CompareModeWidget(QWidget):
         self.btn_next.setEnabled(False)
         self.text_area.setEnabled(False)
         self.btn_split.setEnabled(False)
+        self.status_label.setText("开始处理...")
 
     def _set_idle_state(self):
         self.btn_start.setVisible(True)

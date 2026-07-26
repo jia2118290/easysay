@@ -20,8 +20,21 @@ from PySide6.QtCore import QThread, Signal
 from app.config import ffmpeg_path
 
 AudioSegment.converter = ffmpeg_path()
-
+# pydub 0.25+ 的 AudioSegment 没有 ffprobe 类属性，ffprobe 路径
+# 通过 utils.get_prober_name() → which("ffprobe") 在 PATH 中查找。
+# 打包后需要在 run() 时注入 PATH 环境变量，让 which() 能找到 ffprobe。
 _SPLIT_PUNCTUATION = re.compile(r'([，。！？；：、,.;:!?])')
+
+
+def _ensure_ffmpeg_env() -> None:
+    """将打包后的 ffmpeg/ffprobe 目录追加到 PATH，确保 pydub 能找到。"""
+    import sys
+    if hasattr(sys, "_MEIPASS"):
+        from pathlib import Path
+        ffmpeg_dir = str(Path(sys._MEIPASS) / "ffmpeg")
+        current_path = os.environ.get("PATH", "")
+        if ffmpeg_dir not in current_path:
+            os.environ["PATH"] = f"{ffmpeg_dir}{os.pathsep}{current_path}"
 
 
 class TTSWorker(QThread):
@@ -43,6 +56,8 @@ class TTSWorker(QThread):
 
     def run(self):
         try:
+            _ensure_ffmpeg_env()
+            AudioSegment.converter = ffmpeg_path()
             asyncio.run(self._synthesize())
             if self._cancelled:
                 self.finished_signal.emit(False, "已取消生成")
