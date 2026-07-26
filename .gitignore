@@ -1,0 +1,8 @@
+__pycache__/
+*.pyc
+*.pyo
+build/ffmpeg/ffmpeg
+build/ffmpeg/ffmpeg.exe
+dist/
+*.egg-info/
+.eggs/
