@@ -3,27 +3,25 @@ import os
 import re
 import subprocess
 import platform
-import tempfile
-import asyncio
 
-from PySide6.QtCore import Qt, QThread, Signal, QUrl
+from PySide6.QtCore import Qt, QUrl
 from PySide6.QtGui import QIcon, QAction, QKeySequence, QShortcut
 from PySide6.QtWidgets import (
     QMainWindow, QWidget, QVBoxLayout, QHBoxLayout,
     QTextEdit, QLineEdit, QPushButton, QComboBox, QLabel, QFileDialog,
-    QMessageBox, QGroupBox, QMenuBar, QApplication,
+    QMessageBox, QGroupBox, QMenuBar, QApplication, QTabWidget,
 )
 from PySide6.QtMultimedia import QMediaPlayer, QAudioOutput
-
-import edge_tts
 
 from app.config import APP_DISPLAY_NAME, APP_ICON_PATH, DARK_QSS_PATH
 from app.core.settings_manager import SettingsManager
 from app.core.tts_worker import TTSWorker
+from app.core.tts_preview_worker import PreviewWorker
 from app.core.validator import validate_text_language, format_errors
 from app.core.voice_repository import VoiceRepository
 from app.ui.about_dialog import AboutDialog
 from app.ui.equalizer_widget import EqualizerWidget
+from app.ui.compare_mode_widget import CompareModeWidget
 
 PLACEHOLDER = "请选择"
 
@@ -51,30 +49,6 @@ _CHAR_PER_SECOND = {
 _DEFAULT_CPS = 4.0
 
 _RATE_PATTERN = re.compile(r'^[+-]\d{1,2}%$')
-
-
-class PreviewWorker(QThread):
-    """后台线程：生成试听音频到临时文件，完成后通知 UI 播放"""
-    finished_signal = Signal(bool, str)  # (success, temp_filepath_or_error_msg)
-
-    def __init__(self, text: str, voice: str, rate: str):
-        super().__init__()
-        self.text = text
-        self.voice = voice
-        self.rate = rate
-
-    def run(self):
-        try:
-            tmp = tempfile.NamedTemporaryFile(suffix=".mp3", delete=False)
-            tmp.close()
-            asyncio.run(self._generate(tmp.name))
-            self.finished_signal.emit(True, tmp.name)
-        except Exception as e:  # noqa: BLE001
-            self.finished_signal.emit(False, str(e))
-
-    async def _generate(self, path: str):
-        communicate = edge_tts.Communicate(self.text, self.voice, rate=self.rate)
-        await communicate.save(path)
 
 
 class MainWindow(QMainWindow):
@@ -144,16 +118,35 @@ class MainWindow(QMainWindow):
         layout.setContentsMargins(20, 16, 20, 16)
         self.setCentralWidget(widget)
 
+        # 卡片①：音色设置（两个标签页共享）
         layout.addWidget(self._build_voice_card())
-        layout.addWidget(self._build_output_card())
-        layout.addWidget(self._build_text_card(), stretch=1)
+
+        # 标签页：文本转语音 / 对比读
+        self.tab_widget = QTabWidget()
+
+        # --- 标签页 1：文本转语音 ---
+        tts_widget = QWidget()
+        tts_layout = QVBoxLayout(tts_widget)
+        tts_layout.setContentsMargins(0, 0, 0, 0)
+        tts_layout.setSpacing(10)
+        tts_layout.addWidget(self._build_output_card())
+        tts_layout.addWidget(self._build_text_card(), stretch=1)
+        self.tab_widget.addTab(tts_widget, "文本转语音")
+
+        # --- 标签页 2：对比读 ---
+        self.compare_widget = CompareModeWidget(media_player=self._media_player)
+        self.tab_widget.addTab(self.compare_widget, "对比读")
+
+        layout.addWidget(self.tab_widget, stretch=1)
         layout.addWidget(self.copyright_label())
 
+        # 信号连接
         self.lang_combo.currentTextChanged.connect(self.on_language_changed)
         self.gender_combo.currentTextChanged.connect(self.refresh_voice_list)
-        self.voice_combo.currentTextChanged.connect(self.update_desc)
+        self.voice_combo.currentTextChanged.connect(self._on_voice_changed)
         self.text_input.textChanged.connect(self._on_text_changed)
         self.rate_edit.textChanged.connect(self._on_rate_text_changed)
+        self.tab_widget.currentChanged.connect(self._on_tab_changed)
         self.refresh_voice_list()
 
     # -- 卡片①：音色设置 --------------------------------------------------
@@ -356,18 +349,15 @@ class MainWindow(QMainWindow):
         cps = _CHAR_PER_SECOND.get(lang, _DEFAULT_CPS)
         estimated_sec = char_count / cps
 
-        # 考虑语速调整
         rate_text = self.rate_edit.text()
         rate_match = _RATE_PATTERN.match(rate_text)
         if rate_match:
             rate_pct = int(rate_text.replace("%", "")) / 100.0
             estimated_sec = estimated_sec / (1 + rate_pct)
 
-        # 考虑停顿
         pause_text = self.pause_combo.currentText()
         if pause_text != "无停顿":
             pause_sec = int(pause_text[0])
-            # 粗略估算句子数：按标点切分
             sentence_count = len(re.findall(r'[。！？.!?]', text)) or 1
             estimated_sec += sentence_count * pause_sec
 
@@ -392,6 +382,7 @@ class MainWindow(QMainWindow):
             if -50 <= val <= 50:
                 self.rate_error_label.setVisible(False)
                 self._update_char_count()
+                self._sync_voice_to_compare()
                 return
         self.rate_error_label.setText("⚠ 请输入 -50% ~ +50%")
         self.rate_error_label.setVisible(True)
@@ -409,6 +400,7 @@ class MainWindow(QMainWindow):
         self.voice_combo.setEnabled(False)
         self.update_desc("")
         self._update_char_count()
+        self._sync_voice_to_compare()
 
     def refresh_voice_list(self):
         lang_sel = self.lang_combo.currentText()
@@ -419,6 +411,7 @@ class MainWindow(QMainWindow):
         if lang_sel == PLACEHOLDER or gender_sel == PLACEHOLDER:
             self.voice_combo.setEnabled(False)
             self.update_desc("")
+            return
 
         candidates = self.voice_repo.filter_by(lang_sel, gender_sel)
         self.voice_combo.addItems(candidates)
@@ -433,6 +426,35 @@ class MainWindow(QMainWindow):
         if path:
             self.output_dir = path
             self.dir_edit.setText(path)
+
+    # ------------------------------------------------------------------
+    # 音色变更 → 同步到对比读
+    # ------------------------------------------------------------------
+    def _on_voice_changed(self):
+        self.update_desc(self.voice_combo.currentText())
+        self._sync_voice_to_compare()
+
+    def _sync_voice_to_compare(self):
+        if self.compare_widget:
+            self.compare_widget.set_voice_params(
+                voice=self.voice_combo.currentText(),
+                rate=self.rate_edit.text(),
+                language=self.lang_combo.currentText(),
+            )
+
+    # ------------------------------------------------------------------
+    # 标签页切换
+    # ------------------------------------------------------------------
+    def _on_tab_changed(self, index: int):
+        if index == 0:
+            # 切换到"文本转语音"
+            if self.compare_widget:
+                self.compare_widget.abort_flow()
+        else:
+            # 切换到"对比读" — 同步当前音色参数
+            self._sync_voice_to_compare()
+            if self.worker and self.worker.isRunning():
+                self._cancel_generation()
 
     # ------------------------------------------------------------------
     # 试听
@@ -476,6 +498,8 @@ class MainWindow(QMainWindow):
 
     def closeEvent(self, event):
         self._persist_settings()
+        if self.compare_widget:
+            self.compare_widget.abort_flow()
         if self.worker and self.worker.isRunning():
             self.worker.cancel()
             self.worker.wait(3000)
@@ -516,7 +540,6 @@ class MainWindow(QMainWindow):
             self._show_error(self.voice_error_label, "请筛选并选择音色")
             return
 
-        # 语速校验
         rate = self.rate_edit.text().strip()
         if not _RATE_PATTERN.match(rate):
             self._show_error(self.voice_error_label, "语速格式错误，请输入如 +10% 或 -20%")
@@ -536,7 +559,6 @@ class MainWindow(QMainWindow):
             fname += ".mp3"
         full_path = os.path.join(self.output_dir, fname)
 
-        # 文件覆盖确认
         if os.path.exists(full_path):
             reply = QMessageBox.question(
                 self, "文件已存在",
@@ -595,7 +617,6 @@ class MainWindow(QMainWindow):
                 QMessageBox.critical(self, "错误", msg)
 
     def _open_folder(self, file_path: str):
-        """在文件管理器中打开并选中生成的文件"""
         folder = os.path.dirname(file_path)
         if not os.path.exists(file_path):
             return

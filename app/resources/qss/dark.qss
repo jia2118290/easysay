@@ -228,3 +228,128 @@ QProgressBar::chunk {
     background: #E8A33D;
     border-radius: 4px;
 }
+
+/* ---------- 对比读：输入区和句子列表 ---------- */
+QTextEdit#compareTextArea {
+    background-color: #2C2F37;
+    border: 1px solid #3A3D46;
+    border-radius: 6px;
+    font-size: 12pt;
+}
+QTextEdit#compareTextArea:focus {
+    border: 1px solid #E8A33D;
+}
+
+QListWidget#sentenceList {
+    background-color: #24262C;
+    border: 1px solid #3A3D46;
+    border-radius: 6px;
+    font-size: 11pt;
+    padding: 4px;
+    outline: none;
+}
+QListWidget#sentenceList::item {
+    padding: 8px 10px;
+    border-radius: 4px;
+    color: #B0B3BC;
+}
+QListWidget#sentenceList::item:selected {
+    background-color: #2C2F37;
+    color: #F2F1EE;
+    border-left: 3px solid #E8A33D;
+}
+QListWidget#sentenceList::item:hover {
+    background-color: #2C2F37;
+}
+
+/* ---------- 对比读：当前句子文本 ---------- */
+QLabel#currentSentenceLabel {
+    font-size: 13pt;
+    color: #F2F1EE;
+    padding: 8px;
+}
+
+/* ---------- 对比读：评分显示 ---------- */
+QLabel#scoreValueLabel {
+    font-size: 52pt;
+    font-weight: bold;
+    font-family: "JetBrains Mono", "Cascadia Mono", "SF Mono", "Consolas", monospace;
+    padding: 2px;
+}
+
+QLabel#scoreDetailLabel {
+    font-size: 10.5pt;
+    color: #9C9FA8;
+    padding: 2px;
+}
+
+/* ---------- 对比读：分数徽章（QListWidget 内嵌） ---------- */
+QLabel#scoreBadgeGreen {
+    color: #4ADE80;
+    font-weight: bold;
+    font-size: 10pt;
+    padding: 2px 4px;
+}
+QLabel#scoreBadgeDarkGreen {
+    color: #22C55E;
+    font-weight: bold;
+    font-size: 10pt;
+    padding: 2px 4px;
+}
+QLabel#scoreBadgeOrange {
+    color: #F59E0B;
+    font-weight: bold;
+    font-size: 10pt;
+    padding: 2px 4px;
+}
+QLabel#scoreBadgeYellow {
+    color: #EAB308;
+    font-weight: bold;
+    font-size: 10pt;
+    padding: 2px 4px;
+}
+QLabel#scoreBadgeRed {
+    color: #E5484D;
+    font-weight: bold;
+    font-size: 10pt;
+    padding: 2px 4px;
+}
+
+/* ---------- 对比读：设置按钮 ---------- */
+QPushButton#settingsButton {
+    background-color: transparent;
+    color: #9C9FA8;
+    border: 1px solid #3A3D46;
+    border-radius: 6px;
+    padding: 6px 10px;
+    min-width: 36px;
+}
+QPushButton#settingsButton:hover {
+    border-color: #E8A33D;
+    color: #E8A33D;
+}
+
+/* ---------- QTabWidget 风格 ---------- */
+QTabWidget::pane {
+    border: none;
+    background-color: #1B1D22;
+}
+QTabBar::tab {
+    background-color: #24262C;
+    color: #9C9FA8;
+    border: 1px solid #3A3D46;
+    padding: 8px 24px;
+    margin-right: 2px;
+    border-top-left-radius: 6px;
+    border-top-right-radius: 6px;
+    font-size: 12pt;
+}
+QTabBar::tab:selected {
+    background-color: #2C2F37;
+    color: #E8A33D;
+    border-bottom: 2px solid #E8A33D;
+}
+QTabBar::tab:hover:!selected {
+    color: #F2F1EE;
+    background-color: #2C2F37;
+}
