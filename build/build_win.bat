@@ -7,35 +7,45 @@ REM ==========================================================
 cd /d "%~dp0\.."
 
 echo [1/5] 安装依赖...
-pip install -r requirements.txt
-pip install pyinstaller certifi
+python -m pip install -r requirements.txt --quiet
 
-echo [2/5] 下载静态编译版 ffmpeg（用于 pydub 拼接音频）...
+REM Pillow 是 make_logo.py 的依赖，requirements.txt 里没有，单独安装
+python -m pip install Pillow --quiet
+
+echo [2/5] 下载静态编译版 ffmpeg / ffprobe（用于 pydub 拼接音频）...
 if not exist "build\ffmpeg" mkdir "build\ffmpeg"
-REM gyan.dev 提供 Windows 静态编译的 ffmpeg（无外部 DLL 依赖，可随 App 分发）
-curl -sL -o "build\ffmpeg\ffmpeg.7z" "https://www.gyan.dev/ffmpeg/builds/ffmpeg-release-essentials.7z"
-if exist "build\ffmpeg\ffmpeg.exe" del "build\ffmpeg\ffmpeg.exe"
-REM 用 7z 解压，只提取 ffmpeg.exe；如果系统没有 7z，需要先安装
+
+REM gyan.dev essentials 包包含 ffmpeg.exe + ffprobe.exe，都是静态链接无需额外 DLL
+set "FFMPEG_ZIP=build\ffmpeg\ffmpeg.7z"
+curl -sL -o "%FFMPEG_ZIP%" "https://www.gyan.dev/ffmpeg/builds/ffmpeg-release-essentials.7z"
+
 where 7z >nul 2>&1
 if %ERRORLEVEL% NEQ 0 (
     echo 错误：需要 7-Zip 来解压 ffmpeg，请先安装 https://www.7-zip.org/
     exit /b 1
 )
-7z e "build\ffmpeg\ffmpeg.7z" -o"build\ffmpeg" -r ffmpeg.exe -y
-del "build\ffmpeg\ffmpeg.7z"
-echo   ffmpeg 已就绪: build\ffmpeg\ffmpeg.exe
+
+REM 提取 ffmpeg.exe 和 ffprobe.exe（gyan 包内路径为 ffmpeg-X.X-.../bin/*.exe）
+7z e "%FFMPEG_ZIP%" -o"build\ffmpeg" -r ffmpeg.exe -y
+7z e "%FFMPEG_ZIP%" -o"build\ffmpeg" -r ffprobe.exe -y
+del "%FFMPEG_ZIP%"
+echo   ffmpeg / ffprobe 已就绪: build\ffmpeg\
 
 echo [3/5] 生成 Logo（如果尚未生成）...
 python build\make_logo.py
 
 echo [4/5] 开始打包...
-pyinstaller --noconfirm build\app.spec
+python -m PyInstaller --noconfirm build\app.spec
 
-echo [5/5] 修正打包后 ffmpeg 的可执行权限...
-if exist "dist\EasySay\ffmpeg\ffmpeg.exe" (
-    echo   已确认 ffmpeg.exe 在 dist\EasySay\ffmpeg\ffmpeg.exe
+echo [5/5] 确认打包结果...
+if exist "dist\EasySay.exe" (
+    echo   已生成 dist\EasySay.exe
+) else if exist "dist\EasySay\EasySay.exe" (
+    echo   已生成 dist\EasySay\EasySay.exe
+) else (
+    echo   警告：未找到生成的 exe 文件，请检查上一步打包日志
 )
 
 echo.
-echo 打包完成！可执行文件位于 dist\EasySay\EasySay.exe
+echo 打包完成！
 pause

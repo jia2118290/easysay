@@ -47,18 +47,22 @@ a = Analysis(
 )
 
 # --- 打包 ffmpeg / ffprobe（pydub 依赖） ---
-_ffmpeg_src = os.path.join(PROJECT_ROOT, "build", "ffmpeg", "ffmpeg")
-_ffprobe_src = os.path.join(PROJECT_ROOT, "build", "ffmpeg", "ffprobe")
+if sys.platform == "win32":
+    _ffmpeg_src = os.path.join(PROJECT_ROOT, "build", "ffmpeg", "ffmpeg.exe")
+    _ffprobe_src = os.path.join(PROJECT_ROOT, "build", "ffmpeg", "ffprobe.exe")
+else:
+    _ffmpeg_src = os.path.join(PROJECT_ROOT, "build", "ffmpeg", "ffmpeg")
+    _ffprobe_src = os.path.join(PROJECT_ROOT, "build", "ffmpeg", "ffprobe")
 if os.path.exists(_ffmpeg_src):
-    a.datas.append((os.path.join("ffmpeg", "ffmpeg"), _ffmpeg_src, "DATA"))
+    a.datas.append((os.path.join("ffmpeg", os.path.basename(_ffmpeg_src)), _ffmpeg_src, "DATA"))
 if os.path.exists(_ffprobe_src):
-    a.datas.append((os.path.join("ffmpeg", "ffprobe"), _ffprobe_src, "DATA"))
+    a.datas.append((os.path.join("ffmpeg", os.path.basename(_ffprobe_src)), _ffprobe_src, "DATA"))
 
 # --- 添加 Azure Speech SDK 原生动态库 ---
 import azure.cognitiveservices.speech as _azsdk
 _azsdk_dir = os.path.dirname(_azsdk.__file__)
 for _f in os.listdir(_azsdk_dir):
-    if _f.endswith(".dylib") or _f.endswith(".so"):
+    if _f.endswith((".dylib", ".so", ".dll", ".pyd")):
         _fp = os.path.join(_azsdk_dir, _f)
         a.binaries.append((_f, _fp, "BINARY"))
 
@@ -68,7 +72,7 @@ _sd_dir = os.path.dirname(_sd.__file__)
 _portaudio_dir = os.path.join(_sd_dir, "_sounddevice_data", "portaudio-binaries")
 if os.path.isdir(_portaudio_dir):
     for _f in os.listdir(_portaudio_dir):
-        if _f.endswith(".dylib") or _f.endswith(".so"):
+        if _f.endswith((".dylib", ".so", ".dll", ".pyd")):
             _fp = os.path.join(_portaudio_dir, _f)
             a.binaries.append((_f, _fp, "BINARY"))
 
