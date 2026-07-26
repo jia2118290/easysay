@@ -6,40 +6,56 @@
 set -e
 
 cd "$(dirname "$0")/.."
+PROJECT_ROOT="$(pwd)"
 
-echo "[1/5] 安装依赖..."
-pip install -r requirements.txt
-pip install pyinstaller certifi
+# ---------- 自动检测虚拟环境 ----------
+# 优先使用与手动打包一致的 venv，避免 Python 版本 / ABI 不匹配
+VENV_DIR=""
+for _candidate in "$HOME/env312" "$PROJECT_ROOT/venv" "$PROJECT_ROOT/.venv"; do
+    if [ -f "$_candidate/bin/python" ]; then
+        VENV_DIR="$_candidate"
+        break
+    fi
+done
 
-echo "[2/5] 下载静态编译版 ffmpeg（用于 pydub 拼接音频）..."
-FFMPEG_DIR="build/ffmpeg"
-mkdir -p "$FFMPEG_DIR"
-# evermeet.cx 提供 Mac 静态编译的 ffmpeg（无外部 dylib 依赖，可随 App 分发）
-curl -sL -o "$FFMPEG_DIR/ffmpeg.zip" "https://evermeet.cx/ffmpeg/getrelease/zip"
-unzip -o "$FFMPEG_DIR/ffmpeg.zip" -d "$FFMPEG_DIR"
-rm -f "$FFMPEG_DIR/ffmpeg.zip"
-# evermeet zip 解压后文件名可能带版本号，统一重命名为 ffmpeg
-find "$FFMPEG_DIR" -type f -name 'ffmpeg*' ! -name 'ffmpeg.zip' ! -name 'ffmpeg' -exec mv {} "$FFMPEG_DIR/ffmpeg" \;
-chmod +x "$FFMPEG_DIR/ffmpeg"
-echo "  ffmpeg 已就绪: $FFMPEG_DIR/ffmpeg"
+if [ -n "$VENV_DIR" ]; then
+    echo "[INFO] 使用虚拟环境: $VENV_DIR"
+    PYTHON="$VENV_DIR/bin/python"
+    PIP="$VENV_DIR/bin/pip"
+else
+    echo "[INFO] 未找到虚拟环境，使用系统默认 Python"
+    PYTHON="python3"
+    PIP="pip3"
+fi
 
-echo "[3/5] 生成 Logo（如果尚未生成）..."
-python3 build/make_logo.py
+# ---------- 1. 确认依赖 ----------
+echo "[1/4] 确认依赖..."
+$PIP install -r requirements.txt --quiet
 
-echo "[4/5] 开始打包..."
-pyinstaller --noconfirm build/app.spec
+# ---------- 2. 生成 Logo ----------
+echo "[2/4] 生成 Logo（如果尚未生成）..."
+$PYTHON build/make_logo.py
 
-echo "[5/5] 修正 App Bundle 内 ffmpeg 的可执行权限..."
-# PyInstaller 会把 datas 文件复制到 Contents/Resources/ffmpeg/ffmpeg
-# 需要确保文件有可执行权限，pydub 才能调用
+# ---------- 3. 打包 ----------
+echo "[3/4] 开始打包..."
+$PYTHON -m PyInstaller --noconfirm build/app.spec
+
+# ---------- 4. 修正权限 ----------
+echo "[4/4] 修正 App Bundle 内 ffmpeg/ffprobe 的可执行权限..."
 FFMPEG_IN_APP="dist/EasySay.app/Contents/Resources/ffmpeg/ffmpeg"
+FFPROBE_IN_APP="dist/EasySay.app/Contents/Resources/ffmpeg/ffprobe"
+
 if [ -f "$FFMPEG_IN_APP" ]; then
     chmod +x "$FFMPEG_IN_APP"
     echo "  已修正 $FFMPEG_IN_APP 权限"
 fi
-# macOS 签名后 Gatekeeper 允许运行；未签名 App 首次需右键打开
-FFMPEG_IN_APP_XATTR_CHECK=$(xattr "$FFMPEG_IN_APP" 2>/dev/null || true)
-if [ -n "$FFMPEG_IN_APP_XATTR_CHECK" ]; then
+if [ -f "$FFPROBE_IN_APP" ]; then
+    chmod +x "$FFPROBE_IN_APP"
+    echo "  已修正 $FFPROBE_IN_APP 权限"
+fi
+
+# 清除隔离属性（避免 Gatekeeper 拦截 ffmpeg 等二进制）
+if [ -d "dist/EasySay.app" ]; then
     xattr -cr "dist/EasySay.app" 2>/dev/null || true
     echo "  已清除 App Bundle 扩展属性（quarantine）"
 fi
