@@ -16,6 +16,7 @@ _DEFAULTS: Dict[str, Any] = {
     "last_lang": "请选择",
     "last_rate": "+0%",
     "last_filename": "audio",
+    "last_pause": "无停顿",
 }
 
 

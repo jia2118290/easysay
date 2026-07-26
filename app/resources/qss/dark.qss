@@ -17,14 +17,12 @@
    弱化文字      text-muted     #6C6F78
 ------------------------------------------------------------------------------ */
 
-* {
-    font-family: "PingFang SC", "Microsoft YaHei UI", "Segoe UI", "Noto Sans CJK SC", sans-serif;
-    font-size: 12.5pt;
-    color: #F2F1EE;
-}
-
+/* ---------- 全局默认 ---------- */
 QMainWindow, QWidget {
     background-color: #1B1D22;
+    color: #F2F1EE;
+    font-family: "PingFang SC", "Microsoft YaHei UI", "Segoe UI", "Noto Sans CJK SC", sans-serif;
+    font-size: 12.5pt;
 }
 
 QMenuBar {
@@ -55,11 +53,11 @@ QMenu::item:selected {
     color: #E8A33D;
 }
 
-/* ---------- 分组卡片：小节标题（① 音色设置 等） ---------- */
+/* ---------- 分组卡片 ---------- */
 QGroupBox {
     background-color: #24262C;
     border: 1px solid #3A3D46;
-    border-radius: 10px;
+    border-radius: 8px;
     margin-top: 14px;
     padding-top: 16px;
     padding: 16px 14px 14px 14px;
@@ -77,6 +75,11 @@ QGroupBox::title {
     background-color: #1B1D22;
 }
 
+/* 主操作卡片：左侧琥珀色强调线 */
+QGroupBox#primaryCard {
+    border-left: 3px solid #E8A33D;
+}
+
 /* ---------- 常规标签 ---------- */
 QLabel {
     background: transparent;
@@ -87,7 +90,7 @@ QLabel#fieldLabel {
     font-size: 11pt;
 }
 QLabel#voice_desc_label {
-    color: #4FBFA0;
+    color: #D6912E;
     font-size: 11pt;
     padding: 2px 0;
 }
@@ -98,6 +101,13 @@ QLabel#copyright_label {
 QLabel#status_label {
     font-size: 10.5pt;
     color: #9C9FA8;
+}
+
+/* 内联错误提示 */
+QLabel#errorLabel {
+    color: #E5484D;
+    font-size: 10pt;
+    padding: 2px 4px;
 }
 
 /* ---------- 输入控件 ---------- */
@@ -123,19 +133,35 @@ QComboBox QAbstractItemView {
     selection-color: #1B1D22;
     outline: none;
 }
+
+/* 禁用态：降低整体可见度 */
 QLineEdit:disabled, QComboBox:disabled {
     color: #6C6F78;
-    background-color: #24262C;
+    background-color: #1E2026;
+    border-color: #2C3038;
+}
+QComboBox:disabled::drop-down {
+    background-color: transparent;
 }
 
-/* 数据字段：语速 / 文件名，使用等宽字体，呼应"仪表读数"质感 */
+/* 只读输入框 */
+QLineEdit[readOnly="true"] {
+    color: #B0B3BC;
+    background-color: #262930;
+    border-color: #3A3D46;
+}
+QLineEdit[readOnly="true"]:focus {
+    border-color: #3A3D46;
+}
+
+/* 数据字段：语速 / 目录路径，等宽字体 + 仪表读数质感 */
 QLineEdit#rateEdit, QLineEdit#dirEdit {
     font-family: "JetBrains Mono", "Cascadia Mono", "SF Mono", "Consolas", monospace;
     font-size: 11pt;
     color: #E8A33D;
 }
 
-/* ---------- 按钮：主操作 vs 次要操作分级 ---------- */
+/* ---------- 按钮 ---------- */
 QPushButton {
     font-weight: 600;
     background-color: #E8A33D;
@@ -155,7 +181,7 @@ QPushButton:disabled {
     color: #6C6F78;
 }
 
-/* 次要按钮（如"选择输出目录"）：幽灵描边风格，弱化次要操作 */
+/* 次要按钮：幽灵描边风格 */
 QPushButton#secondaryButton {
     background-color: transparent;
     color: #F2F1EE;
@@ -168,10 +194,21 @@ QPushButton#secondaryButton:hover {
     background-color: rgba(232, 163, 61, 0.08);
 }
 
-/* 主生成按钮：加大字号，作为整个界面的视觉锚点 */
+/* 主生成按钮：整个界面的视觉锚点 */
 QPushButton#generateButton {
     font-size: 13.5pt;
     padding: 12px 16px;
+}
+
+/* ---------- 关于弹窗 ---------- */
+QLabel#aboutName {
+    font-size: 14pt;
+    font-weight: bold;
+    color: #F2F1EE;
+}
+QLabel#aboutNotice {
+    font-size: 9pt;
+    color: #6C6F78;
 }
 
 /* ---------- 进度条（备用，均衡器动画为主展示） ---------- */

@@ -6,28 +6,40 @@ TTS 生成后台线程
      给 UI 层更精确的错误分类，而不是笼统地抛 "失败：xxx"
   2. 用 SubMaker/流式接口边收边写，配合 progress_signal 汇报真实进度，
      而不是"开始 0%，结束 100%"的假进度条
+  3. 标点停顿通过分割文本 + pydub 插入真实静音实现
 """
 import asyncio
+import os
+import re
+import tempfile
 
-from PySide6.QtCore import QThread, Signal
 import edge_tts
+from pydub import AudioSegment
+from PySide6.QtCore import QThread, Signal
+
+from app.config import ffmpeg_path
+
+# 程序启动时设置 pydub 使用的 ffmpeg 路径（兼容打包后的环境）
+AudioSegment.converter = ffmpeg_path()
+
+# 用于在标点处切割文本的正则：匹配一个标点符号，标点包含在结果中
+_SPLIT_PUNCTUATION = re.compile(r'([，。！？；：、,.;:!?])')
 
 
 class TTSWorker(QThread):
-    # 生成完成：(success: bool, message: str)
     finished_signal = Signal(bool, str)
-    # 进度百分比：0~100（估算值，基于已收到的音频字节数，非精确时长）
     progress_signal = Signal(int)
 
-    # 粗略假设：正常语速下，每秒中文语音大概对应此字节数（用于估算总大小从而算百分比）
     _ESTIMATED_BYTES_PER_CHAR = 900
 
-    def __init__(self, text: str, voice: str, rate: str, save_path: str):
+    def __init__(self, text: str, voice: str, rate: str, save_path: str,
+                 pause_seconds: int = 0):
         super().__init__()
-        self.text = text
+        self.text = text.strip()
         self.voice = voice
         self.rate = rate
         self.save_path = save_path
+        self.pause_seconds = pause_seconds
 
     def run(self):
         try:
@@ -39,20 +51,62 @@ class TTSWorker(QThread):
             )
         except (ConnectionError, OSError) as e:
             self.finished_signal.emit(False, f"网络连接失败，请检查网络后重试：{e}")
-        except Exception as e:  # noqa: BLE001 - 兜底捕获，避免线程崩溃
+        except Exception as e:  # noqa: BLE001
             self.finished_signal.emit(False, f"生成失败：{e}")
 
     async def _synthesize(self):
-        communicate = edge_tts.Communicate(self.text, self.voice, rate=self.rate)
-        estimated_total = max(len(self.text) * self._ESTIMATED_BYTES_PER_CHAR, 1)
-        received = 0
+        if self.pause_seconds <= 0:
+            communicate = edge_tts.Communicate(self.text, self.voice, rate=self.rate)
+            await communicate.save(self.save_path)
+            self.progress_signal.emit(100)
+            return
 
-        with open(self.save_path, "wb") as f:
-            async for chunk in communicate.stream():
-                if chunk["type"] == "audio":
-                    data = chunk["data"]
-                    f.write(data)
-                    received += len(data)
-                    percent = min(int(received / estimated_total * 100), 99)
-                    self.progress_signal.emit(percent)
-        self.progress_signal.emit(100)
+        # 按标点切分成句子，每段包含"文本 + 标点"（标点不单独拆出来）
+        # "你好，世界。" → ["你好，", "世界。"]
+        segments = [s for s in _SPLIT_PUNCTUATION.split(self.text) if s]
+        # 把"文本片段"和紧跟的"标点片段"重新合并
+        chunks: list[str] = []
+        buf = ""
+        for s in segments:
+            buf += s
+            if len(s) == 1 and s in "，。！？；：、,.;:!?":
+                chunks.append(buf)
+                buf = ""
+        if buf.strip():
+            chunks.append(buf)
+
+        if not chunks:
+            return
+
+        silence = AudioSegment.silent(duration=self.pause_seconds * 1000)
+        merged: AudioSegment | None = None
+        total = len(chunks)
+        tmp_files: list[str] = []
+
+        try:
+            for i, chunk in enumerate(chunks):
+                seg_audio = await self._tts_to_segment(chunk, tmp_files)
+                merged = seg_audio if merged is None else merged + seg_audio
+                # 最后一段不加静音
+                if i < total - 1:
+                    merged = merged + silence
+                self.progress_signal.emit(int((i + 1) / total * 99))
+
+            if merged:
+                merged.export(self.save_path, format="mp3")
+            self.progress_signal.emit(100)
+        finally:
+            for f in tmp_files:
+                try:
+                    os.remove(f)
+                except OSError:
+                    pass
+
+    async def _tts_to_segment(self, text: str, tmp_files: list[str]) -> AudioSegment:
+        """将一段文本生成临时 MP3，返回 AudioSegment 对象"""
+        tmp = tempfile.NamedTemporaryFile(suffix=".mp3", delete=False)
+        tmp.close()
+        tmp_files.append(tmp.name)
+        communicate = edge_tts.Communicate(text.strip(), self.voice, rate=self.rate)
+        await communicate.save(tmp.name)
+        return AudioSegment.from_mp3(tmp.name)

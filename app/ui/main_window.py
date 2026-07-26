@@ -1,13 +1,18 @@
 """EasySay 主窗口"""
 import os
+import tempfile
+import asyncio
 
-from PySide6.QtCore import Qt
-from PySide6.QtGui import QIcon, QAction
+from PySide6.QtCore import Qt, QThread, Signal, QUrl
+from PySide6.QtGui import QIcon, QAction, QKeySequence, QShortcut
 from PySide6.QtWidgets import (
     QMainWindow, QWidget, QVBoxLayout, QHBoxLayout,
     QTextEdit, QLineEdit, QPushButton, QComboBox, QLabel, QFileDialog,
-    QMessageBox, QGroupBox, QMenuBar,
+    QMessageBox, QGroupBox, QMenuBar, QApplication,
 )
+from PySide6.QtMultimedia import QMediaPlayer, QAudioOutput
+
+import edge_tts
 
 from app.config import APP_DISPLAY_NAME, APP_ICON_PATH, DARK_QSS_PATH
 from app.core.settings_manager import SettingsManager
@@ -19,22 +24,70 @@ from app.ui.equalizer_widget import EqualizerWidget
 
 PLACEHOLDER = "请选择"
 
+# 各语种的试听文本
+_PREVIEW_TEXTS = {
+    "中文 (zh)": "你好，我是一直要求进步的昌强同学。",
+    "英语 (en)": "Hello, I'm Changqiang, always striving to improve.",
+    "日语 (ja)": "こんにちは、私はいつも進歩を求める昌強です。",
+    "韩语 (ko)": "안녕하세요, 저는 항상 진보를 추구하는 창창입니다.",
+    "法语 (fr)": "Bonjour, je suis Changqiang, toujours en quête de progrès.",
+    "意大利语 (it)": "Ciao, sono Changqiang, sempre alla ricerca del progresso.",
+    "西班牙语 (es)": "Hola, soy Changqiang, siempre buscando progresar.",
+}
+
+
+class PreviewWorker(QThread):
+    """后台线程：生成试听音频到临时文件，完成后通知 UI 播放"""
+    finished_signal = Signal(bool, str)  # (success, temp_filepath_or_error_msg)
+
+    def __init__(self, text: str, voice: str, rate: str):
+        super().__init__()
+        self.text = text
+        self.voice = voice
+        self.rate = rate
+
+    def run(self):
+        try:
+            tmp = tempfile.NamedTemporaryFile(suffix=".mp3", delete=False)
+            tmp.close()
+            asyncio.run(self._generate(tmp.name))
+            self.finished_signal.emit(True, tmp.name)
+        except Exception as e:  # noqa: BLE001
+            self.finished_signal.emit(False, str(e))
+
+    async def _generate(self, path: str):
+        communicate = edge_tts.Communicate(self.text, self.voice, rate=self.rate)
+        await communicate.save(path)
+
 
 class MainWindow(QMainWindow):
     def __init__(self):
         super().__init__()
         self.setWindowTitle(APP_DISPLAY_NAME)
         self.setWindowIcon(QIcon(APP_ICON_PATH))
-        self.resize(1280, 960)
+
+        screen = QApplication.primaryScreen()
+        if screen:
+            sz = screen.availableSize()
+            self.resize(int(sz.width() * 0.65), int(sz.height() * 0.75))
+        else:
+            self.resize(1280, 960)
 
         self.voice_repo = VoiceRepository()
         self.settings = SettingsManager()
         self.output_dir = self.settings.get("last_output_dir") or ""
         self.worker: TTSWorker | None = None
+        self.preview_worker: PreviewWorker | None = None
+        self._preview_tmp: str | None = None
+
+        self._audio_output = QAudioOutput()
+        self._media_player = QMediaPlayer()
+        self._media_player.setAudioOutput(self._audio_output)
 
         self._load_stylesheet()
         self._build_menu()
         self._build_ui()
+        self._build_shortcuts()
         self._restore_settings()
 
     # ------------------------------------------------------------------
@@ -43,9 +96,10 @@ class MainWindow(QMainWindow):
     def _load_stylesheet(self):
         try:
             with open(DARK_QSS_PATH, "r", encoding="utf-8") as f:
-                self.setStyleSheet(f.read())
+                qss = f.read()
+            QApplication.instance().setStyleSheet(qss)
         except OSError:
-            pass  # 样式文件缺失不影响功能运行
+            pass
 
     def _build_menu(self):
         menu_bar: QMenuBar = self.menuBar()
@@ -54,6 +108,12 @@ class MainWindow(QMainWindow):
         about_action = QAction("关于 EasySay", self)
         about_action.triggered.connect(self._show_about)
         help_menu.addAction(about_action)
+
+    def _build_shortcuts(self):
+        QShortcut(QKeySequence("Ctrl+Return"), self, self.generate_audio)
+        QShortcut(QKeySequence("Ctrl+Enter"), self, self.generate_audio)
+        QShortcut(QKeySequence("Ctrl+O"), self, self.select_folder)
+        QShortcut(QKeySequence("Ctrl+P"), self, self.preview_audio)
 
     def _show_about(self):
         AboutDialog(self).exec()
@@ -73,14 +133,12 @@ class MainWindow(QMainWindow):
         self.lang_combo.currentTextChanged.connect(self.on_language_changed)
         self.gender_combo.currentTextChanged.connect(self.refresh_voice_list)
         self.voice_combo.currentTextChanged.connect(self.update_desc)
-
+        self.text_input.textChanged.connect(lambda: self._clear_errors())
         self.refresh_voice_list()
 
-    # -- 卡片①：音色设置 --------------------------------------------------
+    # -- 卡片①：音色设置 (两行布局) ----------------------------------------
     def _build_voice_card(self) -> QGroupBox:
         card = QGroupBox("① 音色设置")
-        row = QHBoxLayout()
-        row.setSpacing(8)
 
         self.lang_combo = QComboBox()
         self.lang_combo.addItems([PLACEHOLDER] + self.voice_repo.language_options)
@@ -95,24 +153,44 @@ class MainWindow(QMainWindow):
 
         self.rate_edit = QLineEdit("+0%")
         self.rate_edit.setObjectName("rateEdit")
-        self.rate_edit.setFixedWidth(110)
+        self.rate_edit.setFixedWidth(90)
 
-        row.addWidget(self._field_label("语言"))
-        row.addWidget(self.lang_combo)
-        row.addWidget(self._field_label("性别"))
-        row.addWidget(self.gender_combo)
-        row.addWidget(self._field_label("音色"))
-        row.addWidget(self.voice_combo, stretch=1)
-        row.addWidget(self._field_label("语速"))
-        row.addWidget(self.rate_edit)
+        self.pause_combo = QComboBox()
+        self.pause_combo.addItems(["无停顿"] + [f"{i}秒" for i in range(1, 7)])
+        self.pause_combo.setFixedWidth(80)
+
+        self.btn_preview = QPushButton("试听")
+        self.btn_preview.setObjectName("secondaryButton")
+        self.btn_preview.setEnabled(False)
+        self.btn_preview.clicked.connect(self.preview_audio)
 
         self.voice_desc_label = QLabel("【音色信息】请选择音色")
         self.voice_desc_label.setObjectName("voice_desc_label")
 
+        # --- 第一行：语言 → 性别 → 音色 (三级联动) ---
+        row1 = QHBoxLayout()
+        row1.setSpacing(8)
+        row1.addWidget(self._field_label("语言"))
+        row1.addWidget(self.lang_combo)
+        row1.addWidget(self._field_label("性别"))
+        row1.addWidget(self.gender_combo)
+        row1.addWidget(self._field_label("音色"))
+        row1.addWidget(self.voice_combo, stretch=1)
+
+        # --- 第二行：语速 / 停顿 / 音色描述 / 试听 ---
+        row2 = QHBoxLayout()
+        row2.setSpacing(8)
+        row2.addWidget(self._field_label("语速"))
+        row2.addWidget(self.rate_edit)
+        row2.addWidget(self._field_label("停顿"))
+        row2.addWidget(self.pause_combo)
+        row2.addWidget(self.voice_desc_label, stretch=1)
+        row2.addWidget(self.btn_preview)
+
         card_layout = QVBoxLayout(card)
         card_layout.setSpacing(10)
-        card_layout.addLayout(row)
-        card_layout.addWidget(self.voice_desc_label)
+        card_layout.addLayout(row1)
+        card_layout.addLayout(row2)
         return card
 
     # -- 卡片②：输出设置 --------------------------------------------------
@@ -140,33 +218,48 @@ class MainWindow(QMainWindow):
         fname_row.addWidget(self._field_label("文件名"))
         fname_row.addWidget(self.fname_edit, stretch=1)
 
+        self.dir_error_label = QLabel()
+        self.dir_error_label.setObjectName("errorLabel")
+        self.dir_error_label.setVisible(False)
+
         card_layout.addLayout(dir_row)
         card_layout.addLayout(fname_row)
+        card_layout.addWidget(self.dir_error_label)
         return card
 
-    # -- 卡片③：文本与生成 ------------------------------------------------
+    # -- 卡片③：文本与生成 (主操作区，左侧琥珀色强调) ----------------------
     def _build_text_card(self) -> QGroupBox:
         card = QGroupBox("③ 文本与生成")
+        card.setObjectName("primaryCard")
         card_layout = QVBoxLayout(card)
         card_layout.setSpacing(10)
 
         self.text_input = QTextEdit()
         self.text_input.setPlaceholderText("粘贴文本（中文/英文/日语/韩语/法语/西语/意大利语）...")
 
-        status_row = QHBoxLayout()
-        status_row.setSpacing(10)
+        self.text_error_label = QLabel()
+        self.text_error_label.setObjectName("errorLabel")
+        self.text_error_label.setVisible(False)
+
         self.equalizer = EqualizerWidget()
+        self.equalizer.setFixedHeight(40)
+
         self.status_label = QLabel("就绪")
         self.status_label.setObjectName("status_label")
-        status_row.addWidget(self.equalizer)
-        status_row.addWidget(self.status_label, stretch=1)
 
-        btn_gen = QPushButton("生成 MP3")
+        btn_gen = QPushButton("生成 MP3 (Ctrl+Enter)")
         btn_gen.setObjectName("generateButton")
         btn_gen.clicked.connect(self.generate_audio)
 
+        self.voice_error_label = QLabel()
+        self.voice_error_label.setObjectName("errorLabel")
+        self.voice_error_label.setVisible(False)
+
         card_layout.addWidget(self.text_input, stretch=1)
-        card_layout.addLayout(status_row)
+        card_layout.addWidget(self.text_error_label)
+        card_layout.addWidget(self.equalizer)
+        card_layout.addWidget(self.status_label)
+        card_layout.addWidget(self.voice_error_label)
         card_layout.addWidget(btn_gen)
         return card
 
@@ -199,6 +292,12 @@ class MainWindow(QMainWindow):
         self.rate_edit.setText(self.settings.get("last_rate"))
         self.fname_edit.setText(self.settings.get("last_filename"))
 
+        last_pause = self.settings.get("last_pause")
+        if last_pause:
+            idx = self.pause_combo.findText(last_pause)
+            if idx >= 0:
+                self.pause_combo.setCurrentIndex(idx)
+
     # ------------------------------------------------------------------
     # 联动逻辑
     # ------------------------------------------------------------------
@@ -220,12 +319,14 @@ class MainWindow(QMainWindow):
 
         if lang_sel == PLACEHOLDER or gender_sel == PLACEHOLDER:
             self.voice_combo.setEnabled(False)
+            self.btn_preview.setEnabled(False)
             self.update_desc("")
             return
 
         candidates = self.voice_repo.filter_by(lang_sel, gender_sel)
         self.voice_combo.addItems(candidates)
         self.voice_combo.setEnabled(True)
+        self.btn_preview.setEnabled(len(candidates) > 0)
         self.update_desc(self.voice_combo.currentText())
 
     def update_desc(self, voice_name: str):
@@ -238,26 +339,84 @@ class MainWindow(QMainWindow):
             self.dir_edit.setText(path)
 
     # ------------------------------------------------------------------
+    # 试听
+    # ------------------------------------------------------------------
+    def _parse_pause_seconds(self) -> int:
+        text = self.pause_combo.currentText()
+        if text == "无停顿":
+            return 0
+        return int(text[0])
+
+    def preview_audio(self):
+        lang = self.lang_combo.currentText()
+        voice = self.voice_combo.currentText()
+        if voice == PLACEHOLDER:
+            return
+
+        preview_text = _PREVIEW_TEXTS.get(lang, _PREVIEW_TEXTS["中文 (zh)"])
+        rate = self.rate_edit.text()
+
+        self.btn_preview.setEnabled(False)
+        self.btn_preview.setText("试听中...")
+        self._preview_tmp = None
+
+        self.preview_worker = PreviewWorker(preview_text, voice, rate)
+        self.preview_worker.finished_signal.connect(self._on_preview_complete)
+        self.preview_worker.start()
+
+    def _on_preview_complete(self, success: bool, msg: str):
+        self.btn_preview.setEnabled(True)
+        self.btn_preview.setText("试听")
+        if success:
+            self._preview_tmp = msg
+            self._media_player.setSource(QUrl.fromLocalFile(msg))
+            self._media_player.play()
+        else:
+            QMessageBox.critical(self, "试听失败", f"生成试听音频失败：{msg}")
+
+    def closeEvent(self, event):
+        self._persist_settings()
+        # 清理试听临时文件
+        if self._preview_tmp and os.path.exists(self._preview_tmp):
+            try:
+                os.remove(self._preview_tmp)
+            except OSError:
+                pass
+        super().closeEvent(event)
+
+    def _clear_errors(self):
+        self.text_error_label.setVisible(False)
+        self.dir_error_label.setVisible(False)
+        self.voice_error_label.setVisible(False)
+
+    def _show_error(self, label: QLabel, msg: str):
+        label.setText("⚠ " + msg)
+        label.setVisible(True)
+
+    # ------------------------------------------------------------------
     # 生成流程
     # ------------------------------------------------------------------
     def generate_audio(self):
+        self._clear_errors()
+
         text = self.text_input.toPlainText().strip()
         voice = self.voice_combo.currentText()
         lang_selected = self.lang_combo.currentText()
 
         if not text:
-            QMessageBox.warning(self, "提示", "请输入文本")
+            self._show_error(self.text_error_label, "请输入文本")
+            self.text_input.setFocus()
             return
         if not self.output_dir:
-            QMessageBox.warning(self, "提示", "请选择文件目录")
+            self._show_error(self.dir_error_label, "请选择输出目录")
             return
         if voice == PLACEHOLDER:
-            QMessageBox.warning(self, "提示", "请筛选并选择音色！")
+            self._show_error(self.voice_error_label, "请筛选并选择音色")
             return
 
         errors = validate_text_language(text, lang_selected)
         if errors:
-            QMessageBox.warning(self, "文本语言校验失败", format_errors(errors, lang_selected))
+            self._show_error(self.text_error_label, format_errors(errors, lang_selected))
             return
 
         fname = self.fname_edit.text().strip() or "audio"
@@ -266,9 +425,10 @@ class MainWindow(QMainWindow):
         full_path = os.path.join(self.output_dir, fname)
 
         rate = self.rate_edit.text()
+        pause_seconds = self._parse_pause_seconds()
         self._set_generating_state(True)
 
-        self.worker = TTSWorker(text, voice, rate, full_path)
+        self.worker = TTSWorker(text, voice, rate, full_path, pause_seconds)
         self.worker.progress_signal.connect(self._on_progress)
         self.worker.finished_signal.connect(self.on_complete)
         self.worker.start()
@@ -299,8 +459,5 @@ class MainWindow(QMainWindow):
         self.settings.set("last_lang", self.lang_combo.currentText())
         self.settings.set("last_rate", self.rate_edit.text())
         self.settings.set("last_filename", self.fname_edit.text().strip())
+        self.settings.set("last_pause", self.pause_combo.currentText())
         self.settings.save()
-
-    def closeEvent(self, event):
-        self._persist_settings()
-        super().closeEvent(event)

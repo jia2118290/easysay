@@ -25,7 +25,7 @@ class AboutDialog(QDialog):
 
         name_label = QLabel(APP_DISPLAY_NAME)
         name_label.setAlignment(Qt.AlignCenter)
-        name_label.setStyleSheet("font-size: 14pt; font-weight: bold;")
+        name_label.setObjectName("aboutName")
 
         version_label = QLabel(f"版本 {APP_VERSION}")
         version_label.setAlignment(Qt.AlignCenter)
@@ -38,7 +38,7 @@ class AboutDialog(QDialog):
             "2. 未经授权严禁售卖，侵权行为我方将依法追究法律责任"
         )
         notice_label.setAlignment(Qt.AlignCenter)
-        notice_label.setStyleSheet("font-size: 9pt; color: #aaaaaa;")
+        notice_label.setObjectName("aboutNotice")
 
         btn_layout = QHBoxLayout()
         close_btn = QPushButton("关闭")

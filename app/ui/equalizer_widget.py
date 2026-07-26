@@ -22,7 +22,7 @@ class EqualizerWidget(QWidget):
 
     def __init__(self, parent=None):
         super().__init__(parent)
-        self.setFixedHeight(28)
+        self.setFixedHeight(40)
         self._levels = [0.15] * self.BAR_COUNT   # 当前高度比例 0~1
         self._targets = [0.15] * self.BAR_COUNT  # 动画目标高度
         self._active = False

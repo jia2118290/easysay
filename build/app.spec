@@ -10,6 +10,7 @@ EasySay PyInstaller 打包配置
   - SPECPATH 是 PyInstaller 提供的内置变量，指向本 spec 文件所在目录（build/）
 """
 import os
+import shutil
 import sys
 
 import certifi
@@ -47,6 +48,12 @@ a = Analysis(
     noarchive=False,
     cipher=block_cipher,
 )
+
+# 打包 ffmpeg 静态二进制到 App 中（pydub 依赖，随包分发）
+_ffmpeg_bin = "ffmpeg.exe" if sys.platform == "win32" else "ffmpeg"
+_ffmpeg_src = os.path.join(PROJECT_ROOT, "build", "ffmpeg", _ffmpeg_bin)
+if os.path.exists(_ffmpeg_src):
+    a.datas.append((_ffmpeg_src, os.path.join("ffmpeg", _ffmpeg_bin)))
 
 pyz = PYZ(a.pure, a.zipped_data, cipher=block_cipher)
 

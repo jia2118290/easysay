@@ -61,3 +61,17 @@ APP_ICON_PATH = APP_ICON_ICO if sys.platform == "win32" else APP_ICON_PNG
 
 # 用户配置文件路径
 SETTINGS_FILE_PATH = user_data_dir() / "settings.json"
+
+
+def ffmpeg_path() -> str:
+    """
+    返回 pydub 可用的 ffmpeg 二进制路径。
+    - 打包后：ffmpeg 随包打入 _MEIPASS，从这里解析
+    - 开发环境：直接用系统 PATH 中的 ffmpeg
+    """
+    if hasattr(sys, "_MEIPASS"):
+        base = Path(sys._MEIPASS)  # type: ignore[attr-defined]
+        if sys.platform == "win32":
+            return str(base / "ffmpeg" / "ffmpeg.exe")
+        return str(base / "ffmpeg" / "ffmpeg")
+    return "ffmpeg"
