@@ -116,7 +116,7 @@ QLabel#errorLabel {
 }
 
 /* ---------- 输入控件 ---------- */
-QComboBox, QLineEdit, QTextEdit {
+QComboBox, QLineEdit, QTextEdit, QPlainTextEdit {
     background-color: #2C2F37;
     border: 1px solid #3A3D46;
     border-radius: 6px;
@@ -124,7 +124,7 @@ QComboBox, QLineEdit, QTextEdit {
     selection-background-color: #E8A33D;
     selection-color: #1B1D22;
 }
-QComboBox:focus, QLineEdit:focus, QTextEdit:focus {
+QComboBox:focus, QLineEdit:focus, QTextEdit:focus, QPlainTextEdit:focus {
     border: 1px solid #E8A33D;
 }
 QComboBox::drop-down {

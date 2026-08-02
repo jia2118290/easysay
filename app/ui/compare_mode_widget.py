@@ -435,12 +435,18 @@ class CompareModeWidget(QWidget):
 
         if self.is_flow_active and self.current_idx + 1 < len(self.sentences):
             self.current_idx += 1
-            self.sentence_list.setCurrentRow(self.current_idx)
-            self._process_current_sentence()
+            self.status_label.setText(f"得分已保存，2 秒后进入下一句...（第 {self.current_idx + 1}/{len(self.sentences)} 句）")
+            QTimer.singleShot(2000, self._advance_to_next)
         else:
             self.is_flow_active = False
             self._set_idle_state()
             self.status_label.setText("全部句子评测完成！")
+
+    def _advance_to_next(self):
+        if not self.is_flow_active:
+            return
+        self.sentence_list.setCurrentRow(self.current_idx)
+        self._process_current_sentence()
 
     # ------------------------------------------------------------------
     # 评分显示

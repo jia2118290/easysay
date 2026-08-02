@@ -22,6 +22,7 @@ from app.core.voice_repository import VoiceRepository
 from app.ui.about_dialog import AboutDialog
 from app.ui.equalizer_widget import EqualizerWidget
 from app.ui.compare_mode_widget import CompareModeWidget
+from app.ui.line_number_edit import LineNumberTextEdit
 
 PLACEHOLDER = "请选择"
 
@@ -135,7 +136,7 @@ class MainWindow(QMainWindow):
 
         # --- 标签页 2：对比读 ---
         self.compare_widget = CompareModeWidget(media_player=self._media_player, parent=self)
-        self.tab_widget.addTab(self.compare_widget, "对比读")
+        self.tab_widget.addTab(self.compare_widget, "Azure对比读")
 
         layout.addWidget(self.tab_widget, stretch=1)
         layout.addWidget(self.copyright_label())
@@ -252,7 +253,7 @@ class MainWindow(QMainWindow):
         card_layout = QVBoxLayout(card)
         card_layout.setSpacing(10)
 
-        self.text_input = QTextEdit()
+        self.text_input = LineNumberTextEdit()
         self.text_input.setPlaceholderText("粘贴文本（中文/英文/日语/韩语/法语/西语/意大利语）...")
 
         self.text_error_label = QLabel()
@@ -336,7 +337,22 @@ class MainWindow(QMainWindow):
     # ------------------------------------------------------------------
     def _on_text_changed(self):
         self._clear_errors()
+        self._clean_text()
         self._update_char_count()
+
+    def _clean_text(self):
+        text = self.text_input.toPlainText()
+        # 去空行：多个连续换行 → 一个，纯空白行删除
+        cleaned = re.sub(r'\n{3,}', '\n\n', text)
+        cleaned = re.sub(r'\n[ \t]+\n', '\n', cleaned)
+        if cleaned != text:
+            cursor = self.text_input.textCursor()
+            pos = cursor.position()
+            self.text_input.blockSignals(True)
+            self.text_input.setPlainText(cleaned)
+            cursor.setPosition(min(pos, len(cleaned)))
+            self.text_input.setTextCursor(cursor)
+            self.text_input.blockSignals(False)
 
     def _update_char_count(self):
         text = self.text_input.toPlainText()

@@ -4,17 +4,75 @@
 从 UI 类里抽出来，方便：
   1. 单独写单元测试（tests/test_validator.py）
   2. 以后如果做成 CLI 版本 / Web 服务，也能直接复用这段逻辑
+
+校验策略：每个语言定义"允许的字符"正则，凡是匹配不上的字符（跳过空白）
+就报校验错误。数字、连字符、通用标点对各语言都放行。
 """
 import re
 from dataclasses import dataclass
 from typing import List
 
-_RE_CHINESE = re.compile(r'[\u4e00-\u9fff，。！？；：""''（）【】、]')
-_RE_ENGLISH = re.compile(r'[a-zA-Z,.!?;:\'"() ]')
-_RE_JAPANESE = re.compile(r'[\u3040-\u309f\u30a0-\u30ff\u4e00-\u9fff､。！？]')
-_RE_KOREAN = re.compile(r'[\uac00-\ud7af\u3130-\u318f]')
-_RE_LATIN_EXT = re.compile(
-    r'[a-zA-Zàáâäãåąčćęèéêëėįìíîïłńòóôöõøùúûüųūÿýżźñçčšž,.!?;:\'"() ]'
+# 各语言特有字符
+_RE_CHINESE = re.compile(
+    r'[一-鿿㐀-䶿'
+    r'，。！？；：""''（）【】、'
+    r'《》…—～·]'
+)
+_RE_JAPANESE = re.compile(
+    r'[぀-ゟ゠-ヿ一-鿿'
+    r'｡｢｣､･ｦｧｨｩｪｫｬｭｮｯ'
+    r'ｰｱｲｳｴｵｶｷｸｹｺｻｼｽｾｿ'
+    r'ﾀﾁﾂﾃﾄﾅﾆﾇﾈﾉﾊﾋﾌﾍﾎﾏ'
+    r'ﾐﾑﾒﾓﾔﾕﾖﾗﾘﾙﾚﾛﾜﾝ'
+    r'〜。、！？]'
+)
+_RE_KOREAN = re.compile(
+    r'[가-힯㄰-㆏'
+    r'。！？，、·]'
+)
+
+# 拉丁语系（英/法/意/西）共用：字母 + 带音符字母 + 本语种标点
+_RE_LATIN_BASE = (
+    r"[a-zA-Z0-9"
+    r"àáâäãåąăāæ"
+    r"ÀÁÂÄÃÅĄĂĀÆ"
+    r"çćčĉċ"
+    r"ÇĆČĈĊ"
+    r"èéêëēėęěĕ"
+    r"ÈÉÊËĒĖĘĚĔ"
+    r"ìíîïīįĭ"
+    r"ÌÍÎÏĪĮĬ"
+    r"łľĺļ"
+    r"ŁĽĹĻ"
+    r"ñńňņŋ"
+    r"ÑŃŇŅŊ"
+    r"òóôöõøōőŏ"
+    r"ÒÓÔÖÕØŌŐŎ"
+    r"ùúûüūųůűŭ"
+    r"ÙÚÛÜŪŲŮŰŬ"
+    r"ýÿŷ"
+    r"ÝŸŶ"
+    r"żźž"
+    r"ŻŹŽ"
+    r"ß"
+    r"šśŝşș"
+    r"ŠŚŜŞȘ"
+    r"ğ"
+    r"Ğ"
+    r"]"
+)
+
+# 各语种特有字母
+_RE_FRENCH_EXTRA = re.compile(r"[œæŒÆ]")
+_RE_SPANISH_EXTRA = re.compile(r"[¿¡]")
+
+# 对所有语言都放行的：数字、通用标点
+_RE_UNIVERSAL = re.compile(
+    r"[0-9"
+    r".,!?;:\'\"()\[\]{}"
+    r"\-–—/@#$%&*+=<>"
+    r" "  # non-breaking space
+    r" ]"
 )
 
 _LATIN_LANGS = {"法语 (fr)", "意大利语 (it)", "西班牙语 (es)"}
@@ -32,17 +90,23 @@ class ValidationError:
 
 
 def _match_char(char: str, lang_label: str) -> bool:
+    if _RE_UNIVERSAL.match(char):
+        return True
     if lang_label == "中文 (zh)":
         return bool(_RE_CHINESE.match(char))
     if lang_label == "英语 (en)":
-        return bool(_RE_ENGLISH.match(char))
+        return bool(re.match(_RE_LATIN_BASE, char))
     if lang_label == "日语 (ja)":
         return bool(_RE_JAPANESE.match(char))
     if lang_label == "韩语 (ko)":
         return bool(_RE_KOREAN.match(char))
-    if lang_label in _LATIN_LANGS:
-        return bool(_RE_LATIN_EXT.match(char))
-    return True  # 未知语言标签，不做校验
+    if lang_label == "法语 (fr)":
+        return bool(re.match(_RE_LATIN_BASE, char) or _RE_FRENCH_EXTRA.match(char))
+    if lang_label == "意大利语 (it)":
+        return bool(re.match(_RE_LATIN_BASE, char))
+    if lang_label == "西班牙语 (es)":
+        return bool(re.match(_RE_LATIN_BASE, char) or _RE_SPANISH_EXTRA.match(char))
+    return True
 
 
 def validate_text_language(text: str, lang_label: str, context_len: int = 12) -> List[ValidationError]:
