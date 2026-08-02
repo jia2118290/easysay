@@ -1,7 +1,7 @@
 """对比读模式 Widget
 
 流程：粘贴文案 → 拆分句子 → 系统朗读当前句 → 等待 1 秒 → 用户跟读录音
-→ 停止录音 → Azure 评分 → 显示结果 → 自动跳下一句
+→ 点击停止录音 → Azure 评分 → 显示结果 → 自动跳下一句
 """
 import os
 import re
@@ -53,10 +53,14 @@ class CompareModeWidget(QWidget):
         self._recorder: AudioRecorder | None = None
         self._pron_worker: PronunciationWorker | None = None
         self._tts_tmp: str | None = None
+        self._wav_tmp: str | None = None
 
         self._voice_name: str = "请选择"
         self._voice_rate: str = "+0%"
         self._voice_lang: str = ""
+
+        self._is_recording: bool = False
+        self._is_scoring: bool = False
 
         self._build_ui()
         self._connect_signals()
@@ -68,6 +72,8 @@ class CompareModeWidget(QWidget):
 
     def abort_flow(self):
         self.is_flow_active = False
+        self._is_recording = False
+        self._is_scoring = False
         if self._preview_worker and self._preview_worker.isRunning():
             self._preview_worker.terminate()
         if self._recorder and self._recorder.isRunning():
@@ -205,7 +211,6 @@ class CompareModeWidget(QWidget):
         self._split_timer.setInterval(600)
         self._split_timer.timeout.connect(self._split_and_reload)
         self.text_area.textChanged.connect(lambda: self._split_timer.start())
-        # 注意：mediaStatusChanged 在 _on_tts_ready 每次播放前连接，避免重复触发
 
     # ------------------------------------------------------------------
     # 句子管理
@@ -213,6 +218,10 @@ class CompareModeWidget(QWidget):
     def _split_and_reload(self):
         self._split_timer.stop()
         text = self.text_area.toPlainText().strip()
+        # 去掉空行：多个连续换行 → 单个换行
+        text = re.sub(r'\n{2,}', '\n', text)
+        # 只含空白字符的行 → 删除
+        text = re.sub(r'\n[ \t]*\n', '\n', text)
         if not text:
             self.sentences = []
             self._rebuild_list()
@@ -284,6 +293,7 @@ class CompareModeWidget(QWidget):
             self.score_value_label.setStyleSheet("")
             self.score_detail_label.setText("准确度 / 流利度 / 完整度 / 语调")
             self.score_detail_label.setStyleSheet("")
+            self.current_sentence_label.setText(self.sentences[self.current_idx])
 
     # ------------------------------------------------------------------
     # 开始 / 停止 流程
@@ -309,20 +319,26 @@ class CompareModeWidget(QWidget):
                 "请先配置 Azure 语音服务\n点击底部「⚙ 设置」按钮，输入 API Key 和 Region")
             return
 
-        print("[CompareMode] _start_flow continuing to _process_current_sentence")
         self.is_flow_active = True
         self._set_active_state()
         self._process_current_sentence()
 
     def _stop_flow(self):
+        # 录音阶段：停止录音，保留 is_flow_active，等待评分回显
+        if self._is_recording and self._recorder and self._recorder.isRunning():
+            self._recorder.stop()
+            self.status_label.setText("正在停止录音并提交评分...")
+            return
+
+        # 评分阶段：已提交，等结果即可，不强制中止
+        if self._is_scoring:
+            return
+
+        # 其余阶段（TTS 生成 / 朗读中）：直接中止
         self.is_flow_active = False
         self._media_player.stop()
         if self._preview_worker and self._preview_worker.isRunning():
             self._preview_worker.terminate()
-        if self._recorder and self._recorder.isRunning():
-            self._recorder.stop()
-        if self._pron_worker and self._pron_worker.isRunning():
-            self._pron_worker.terminate()
         self._cleanup_temps()
         self._set_idle_state()
         self.status_label.setText("已停止")
@@ -350,11 +366,10 @@ class CompareModeWidget(QWidget):
         self._tts_tmp = msg
         self.status_label.setText("正在朗读参考发音...")
         self._media_player.setSource(QUrl.fromLocalFile(msg))
-        # 每次播放前重新连接 (disconnect 避免重复)
         try:
             self._media_player.mediaStatusChanged.disconnect(self._on_media_status)
         except RuntimeError:
-            pass  # 信号未连接到该 slot
+            pass
         self._media_player.mediaStatusChanged.connect(self._on_media_status)
         self._media_player.play()
 
@@ -364,21 +379,24 @@ class CompareModeWidget(QWidget):
         if not self.is_flow_active:
             return
         self.status_label.setText("准备录音...")
-        # 1 秒后开始录音
         QTimer.singleShot(1000, self._start_recording)
 
     def _start_recording(self):
         if not self.is_flow_active:
             return
+        self._is_recording = True
         self.status_label.setText(f"正在录音，请朗读...（第 {self.current_idx + 1}/{len(self.sentences)} 句）")
         self.equalizer.start()
 
-        self._recorder = AudioRecorder(sample_rate=16000)
+        audio_dir = self.settings.get("azure_audio_dir") or ""
+        self._recorder = AudioRecorder(sample_rate=16000, save_dir=audio_dir)
         self._recorder.finished_signal.connect(self._on_recording_done)
         self._recorder.start()
 
     def _on_recording_done(self, success: bool, msg: str):
         self.equalizer.stop()
+        self._is_recording = False
+
         if not self.is_flow_active:
             self._cleanup_temp_file(msg)
             return
@@ -387,20 +405,21 @@ class CompareModeWidget(QWidget):
             self._set_idle_state()
             return
 
-        wav_path = msg
+        self._wav_tmp = msg
+        self._is_scoring = True
         sentence = self.sentences[self.current_idx]
 
         self.status_label.setText(f"正在评分...（第 {self.current_idx + 1}/{len(self.sentences)} 句）")
         key = self.settings.get("azure_speech_key") or ""
         region = self.settings.get("azure_speech_region") or ""
 
-        self._pron_worker = PronunciationWorker(wav_path, sentence, key, region)
+        self._pron_worker = PronunciationWorker(self._wav_tmp, sentence, key, region)
         self._pron_worker.finished_signal.connect(self._on_scoring_done)
         self._pron_worker.start()
 
     def _on_scoring_done(self, success: bool, data: dict):
         self.equalizer.stop()
-        # 清理 WAV 和 TTS 临时文件
+        self._is_scoring = False
         self._cleanup_temps()
 
         if not success:
@@ -432,6 +451,7 @@ class CompareModeWidget(QWidget):
         fluency = scores.get("fluency", 0)
         completeness = scores.get("completeness", 0)
         prosody = scores.get("prosody", 0)
+        words = scores.get("words", [])
 
         color = _get_score_color(overall)
         self.score_value_label.setText(str(int(overall)))
@@ -444,6 +464,37 @@ class CompareModeWidget(QWidget):
             f"|  完整度 {int(completeness)}  |  语调 {int(prosody)}"
         )
         self.status_label.setText(f"得分：{int(overall)}")
+
+        self._show_word_highlights(words)
+
+    def _show_word_highlights(self, words: list[dict]):
+        sentence = self.sentences[self.current_idx]
+        if not words:
+            self.current_sentence_label.setText(sentence)
+            return
+
+        parts = []
+        ref_text = sentence
+        pos = 0
+
+        for w in words:
+            word = w.get("word", "")
+            w_acc = w.get("accuracy", 0)
+            w_err = w.get("error_type", "")
+
+            idx = ref_text.find(word, pos)
+            if idx > pos:
+                parts.append(_plain_span(ref_text[pos:idx]))
+            elif idx == -1:
+                continue
+
+            parts.append(_word_span(word, w_acc, w_err))
+            pos = idx + len(word)
+
+        if pos < len(ref_text):
+            parts.append(_plain_span(ref_text[pos:]))
+
+        self.current_sentence_label.setText("<p>" + "".join(parts) + "</p>")
 
     # ------------------------------------------------------------------
     # 状态切换
@@ -485,6 +536,12 @@ class CompareModeWidget(QWidget):
             except OSError:
                 pass
         self._tts_tmp = None
+        if self._wav_tmp and os.path.exists(self._wav_tmp):
+            try:
+                os.remove(self._wav_tmp)
+            except OSError:
+                pass
+        self._wav_tmp = None
 
     @staticmethod
     def _cleanup_temp_file(path: str):
@@ -506,3 +563,25 @@ def _get_score_color(score: float) -> str:
         return "#EAB308"
     else:
         return "#E5484D"
+
+
+def _word_span(word: str, accuracy: float, error_type: str) -> str:
+    if error_type == "None" or not error_type:
+        # 发音准确：白色
+        return f'<span style="color:#F2F1EE;">{word}</span>'
+
+    if accuracy >= 80:
+        c = "#F59E0B"
+    elif accuracy >= 60:
+        c = "#EAB308"
+    else:
+        c = "#E5484D"
+
+    if error_type == "Omission":
+        return f'<span style="color:{c}; text-decoration:underline;">{word}</span>'
+    else:
+        return f'<span style="color:{c}; font-weight:bold;">{word}</span>'
+
+
+def _plain_span(text: str) -> str:
+    return f'<span style="color:#6C6F78;">{text}</span>'

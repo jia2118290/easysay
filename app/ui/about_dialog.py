@@ -1,4 +1,4 @@
-"""关于弹窗：展示版本号、作者、版权声明"""
+"""关于弹窗：展示版本号、开发者、版权声明"""
 from PySide6.QtCore import Qt
 from PySide6.QtGui import QPixmap
 from PySide6.QtWidgets import QDialog, QLabel, QVBoxLayout, QPushButton, QHBoxLayout
@@ -30,7 +30,7 @@ class AboutDialog(QDialog):
         version_label = QLabel(f"版本 {APP_VERSION}")
         version_label.setAlignment(Qt.AlignCenter)
 
-        author_label = QLabel(f"作者：{APP_AUTHOR}")
+        author_label = QLabel(f"开发者：{APP_AUTHOR}")
         author_label.setAlignment(Qt.AlignCenter)
 
         notice_label = QLabel(

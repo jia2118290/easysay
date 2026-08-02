@@ -306,7 +306,7 @@ class MainWindow(QMainWindow):
     def copyright_label(self) -> QLabel:
         label = QLabel(
             "1. 本软件可免费自由传播使用　2. 未经授权严禁售卖，侵权行为我方将依法追究法律责任　"
-            "作者：一直要求进步的昌强同学"
+            "开发者：一直要求进步的昌强同学"
         )
         label.setObjectName("copyright_label")
         label.setAlignment(Qt.AlignCenter)
@@ -417,9 +417,18 @@ class MainWindow(QMainWindow):
         self.voice_combo.addItems(candidates)
         self.voice_combo.setEnabled(True)
         self.update_desc(self.voice_combo.currentText())
+        # 用 Data role 存原始名称，显示本地化名称
+        for i in range(1, self.voice_combo.count()):
+            original = self.voice_combo.itemText(i)
+            self.voice_combo.setItemText(i, self.voice_repo.localized_name(original))
+            self.voice_combo.setItemData(i, original)
 
     def update_desc(self, voice_name: str):
-        self.voice_desc_label.setText(self.voice_repo.describe(voice_name))
+        if voice_name == PLACEHOLDER or not voice_name:
+            self.voice_desc_label.setText("【音色信息】请选择音色")
+            return
+        original = self._get_selected_voice()
+        self.voice_desc_label.setText(self.voice_repo.describe(original))
 
     def select_folder(self):
         path = QFileDialog.getExistingDirectory(self, "选择文件夹")
@@ -434,10 +443,17 @@ class MainWindow(QMainWindow):
         self.update_desc(self.voice_combo.currentText())
         self._sync_voice_to_compare()
 
+    def _get_selected_voice(self) -> str:
+        idx = self.voice_combo.currentIndex()
+        if idx <= 0:
+            return self.voice_combo.currentText()
+        original = self.voice_combo.itemData(idx)
+        return original if original else self.voice_combo.currentText()
+
     def _sync_voice_to_compare(self):
         if self.compare_widget:
             self.compare_widget.set_voice_params(
-                voice=self.voice_combo.currentText(),
+                voice=self._get_selected_voice(),
                 rate=self.rate_edit.text(),
                 language=self.lang_combo.currentText(),
             )
@@ -467,7 +483,7 @@ class MainWindow(QMainWindow):
 
     def preview_audio(self):
         lang = self.lang_combo.currentText()
-        voice = self.voice_combo.currentText()
+        voice = self._get_selected_voice()
         if lang == PLACEHOLDER:
             self._show_error(self.voice_error_label, "请先选择语言")
             return
@@ -526,7 +542,7 @@ class MainWindow(QMainWindow):
         self._clear_errors()
 
         text = self.text_input.toPlainText().strip()
-        voice = self.voice_combo.currentText()
+        voice = self._get_selected_voice()
         lang_selected = self.lang_combo.currentText()
 
         if not text:

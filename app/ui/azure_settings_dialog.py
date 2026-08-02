@@ -3,6 +3,7 @@ from PySide6.QtCore import Qt
 from PySide6.QtWidgets import (
     QDialog, QVBoxLayout, QHBoxLayout, QFormLayout,
     QLabel, QLineEdit, QComboBox, QPushButton, QMessageBox,
+    QFileDialog,
 )
 
 from app.core.settings_manager import SettingsManager
@@ -42,7 +43,7 @@ class AzureSettingsDialog(QDialog):
         else:
             self.settings = SettingsManager()
         self.setWindowTitle("Azure 语音服务设置")
-        self.setFixedSize(420, 260)
+        self.setFixedSize(480, 340)
 
         layout = QVBoxLayout(self)
         layout.setSpacing(14)
@@ -71,8 +72,24 @@ class AzureSettingsDialog(QDialog):
         else:
             self.region_combo.setCurrentText(saved_region)
 
+        # 音频文件目录
+        audio_dir_row = QHBoxLayout()
+        audio_dir_row.setSpacing(8)
+        self.audio_dir_edit = QLineEdit()
+        self.audio_dir_edit.setReadOnly(True)
+        self.audio_dir_edit.setPlaceholderText("选择录音文件保存目录（默认系统临时目录）")
+        saved_audio_dir = self.settings.get("azure_audio_dir") or ""
+        if saved_audio_dir:
+            self.audio_dir_edit.setText(saved_audio_dir)
+        btn_browse = QPushButton("浏览")
+        btn_browse.setObjectName("secondaryButton")
+        btn_browse.clicked.connect(self._browse_audio_dir)
+        audio_dir_row.addWidget(self.audio_dir_edit, stretch=1)
+        audio_dir_row.addWidget(btn_browse)
+
         form.addRow("API Key：", self.key_edit)
         form.addRow("Region：", self.region_combo)
+        form.addRow("音频目录：", audio_dir_row)
 
         btn_row = QHBoxLayout()
         btn_row.setSpacing(8)
@@ -98,6 +115,11 @@ class AzureSettingsDialog(QDialog):
         layout.addStretch()
         layout.addLayout(btn_row)
 
+    def _browse_audio_dir(self):
+        path = QFileDialog.getExistingDirectory(self, "选择音频文件保存目录")
+        if path:
+            self.audio_dir_edit.setText(path)
+
     def _save_and_accept(self):
         key = self.key_edit.text().strip()
         region = self.region_combo.currentText().strip()
@@ -109,6 +131,7 @@ class AzureSettingsDialog(QDialog):
             return
         self.settings.set("azure_speech_key", key)
         self.settings.set("azure_speech_region", region)
+        self.settings.set("azure_audio_dir", self.audio_dir_edit.text().strip())
         self.settings.save()
         self.accept()
 

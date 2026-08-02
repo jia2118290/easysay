@@ -19,6 +19,7 @@ _DEFAULTS: Dict[str, Any] = {
     "last_pause": "无停顿",
     "azure_speech_key": "",
     "azure_speech_region": "eastasia",
+    "azure_audio_dir": "",
 }
 
 

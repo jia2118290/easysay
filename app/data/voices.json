@@ -1,514 +1,130 @@
 {
-  "en-AU-NatashaNeural": {
-    "gender": "Female",
-    "desc": "General | Friendly, Positive"
-  },
-  "en-AU-WilliamMultilingualNeural": {
-    "gender": "Male",
-    "desc": "General | Friendly, Positive"
-  },
-  "en-CA-ClaraNeural": {
-    "gender": "Female",
-    "desc": "General | Friendly, Positive"
-  },
-  "en-CA-LiamNeural": {
-    "gender": "Male",
-    "desc": "General | Friendly, Positive"
-  },
-  "en-GB-LibbyNeural": {
-    "gender": "Female",
-    "desc": "General | Friendly, Positive"
-  },
-  "en-GB-MaisieNeural": {
-    "gender": "Female",
-    "desc": "General | Friendly, Positive"
-  },
-  "en-GB-RyanNeural": {
-    "gender": "Male",
-    "desc": "General | Friendly, Positive"
-  },
-  "en-GB-SoniaNeural": {
-    "gender": "Female",
-    "desc": "General | Friendly, Positive"
-  },
-  "en-GB-ThomasNeural": {
-    "gender": "Male",
-    "desc": "General | Friendly, Positive"
-  },
-  "en-HK-SamNeural": {
-    "gender": "Male",
-    "desc": "General | Friendly, Positive"
-  },
-  "en-HK-YanNeural": {
-    "gender": "Female",
-    "desc": "General | Friendly, Positive"
-  },
-  "en-IE-ConnorNeural": {
-    "gender": "Male",
-    "desc": "General | Friendly, Positive"
-  },
-  "en-IE-EmilyNeural": {
-    "gender": "Female",
-    "desc": "General | Friendly, Positive"
-  },
-  "en-IN-NeerjaExpressiveNeural": {
-    "gender": "Female",
-    "desc": "General | Friendly, Positive"
-  },
-  "en-IN-NeerjaNeural": {
-    "gender": "Female",
-    "desc": "General | Friendly, Positive"
-  },
-  "en-IN-PrabhatNeural": {
-    "gender": "Male",
-    "desc": "General | Friendly, Positive"
-  },
-  "en-KE-AsiliaNeural": {
-    "gender": "Female",
-    "desc": "General | Friendly, Positive"
-  },
-  "en-KE-ChilembaNeural": {
-    "gender": "Male",
-    "desc": "General | Friendly, Positive"
-  },
-  "en-NG-AbeoNeural": {
-    "gender": "Male",
-    "desc": "General | Friendly, Positive"
-  },
-  "en-NG-EzinneNeural": {
-    "gender": "Female",
-    "desc": "General | Friendly, Positive"
-  },
-  "en-NZ-MitchellNeural": {
-    "gender": "Male",
-    "desc": "General | Friendly, Positive"
-  },
-  "en-NZ-MollyNeural": {
-    "gender": "Female",
-    "desc": "General | Friendly, Positive"
-  },
-  "en-PH-JamesNeural": {
-    "gender": "Male",
-    "desc": "General | Friendly, Positive"
-  },
-  "en-PH-RosaNeural": {
-    "gender": "Female",
-    "desc": "General | Friendly, Positive"
-  },
-  "en-SG-LunaNeural": {
-    "gender": "Female",
-    "desc": "General | Friendly, Positive"
-  },
-  "en-SG-WayneNeural": {
-    "gender": "Male",
-    "desc": "General | Friendly, Positive"
-  },
-  "en-TZ-ElimuNeural": {
-    "gender": "Male",
-    "desc": "General | Friendly, Positive"
-  },
-  "en-TZ-ImaniNeural": {
-    "gender": "Female",
-    "desc": "General | Friendly, Positive"
-  },
-  "en-US-AnaNeural": {
-    "gender": "Female",
-    "desc": "Cartoon, Conversation | Cute"
-  },
-  "en-US-AndrewMultilingualNeural": {
-    "gender": "Male",
-    "desc": "Conversation, Copilot | Warm, Confident, Authentic, Honest"
-  },
-  "en-US-AndrewNeural": {
-    "gender": "Male",
-    "desc": "Conversation, Copilot | Warm, Confident, Authentic, Honest"
-  },
-  "en-US-AriaNeural": {
-    "gender": "Female",
-    "desc": "News, Novel | Positive, Confident"
-  },
-  "en-US-AvaMultilingualNeural": {
-    "gender": "Female",
-    "desc": "Conversation, Copilot | Expressive, Caring, Pleasant, Friendly"
-  },
-  "en-US-AvaNeural": {
-    "gender": "Female",
-    "desc": "Conversation, Copilot | Expressive, Caring, Pleasant, Friendly"
-  },
-  "en-US-BrianMultilingualNeural": {
-    "gender": "Male",
-    "desc": "Conversation, Copilot | Approachable, Casual, Sincere"
-  },
-  "en-US-BrianNeural": {
-    "gender": "Male",
-    "desc": "Conversation, Copilot | Approachable, Casual, Sincere"
-  },
-  "en-US-ChristopherNeural": {
-    "gender": "Male",
-    "desc": "News, Novel | Reliable, Authority"
-  },
-  "en-US-EmmaMultilingualNeural": {
-    "gender": "Female",
-    "desc": "Conversation, Copilot | Cheerful, Clear, Conversational"
-  },
-  "en-US-EmmaNeural": {
-    "gender": "Female",
-    "desc": "Conversation, Copilot | Cheerful, Clear, Conversational"
-  },
-  "en-US-EricNeural": {
-    "gender": "Male",
-    "desc": "News, Novel | Rational"
-  },
-  "en-US-GuyNeural": {
-    "gender": "Male",
-    "desc": "News, Novel | Passion"
-  },
-  "en-US-JennyNeural": {
-    "gender": "Female",
-    "desc": "General | Friendly, Considerate, Comfort"
-  },
-  "en-US-MichelleNeural": {
-    "gender": "Female",
-    "desc": "News, Novel | Friendly, Pleasant"
-  },
-  "en-US-RogerNeural": {
-    "gender": "Male",
-    "desc": "News, Novel | Lively"
-  },
-  "en-US-SteffanNeural": {
-    "gender": "Male",
-    "desc": "News, Novel | Rational"
-  },
-  "en-ZA-LeahNeural": {
-    "gender": "Female",
-    "desc": "General | Friendly, Positive"
-  },
-  "en-ZA-LukeNeural": {
-    "gender": "Male",
-    "desc": "General | Friendly, Positive"
-  },
-  "ja-JP-KeitaNeural": {
-    "gender": "Male",
-    "desc": "General | Friendly, Positive"
-  },
-  "ja-JP-NanamiNeural": {
-    "gender": "Female",
-    "desc": "General | Friendly, Positive"
-  },
-  "ko-KR-HyunsuMultilingualNeural": {
-    "gender": "Male",
-    "desc": "General | Friendly, Positive"
-  },
-  "ko-KR-InJoonNeural": {
-    "gender": "Male",
-    "desc": "General | Friendly, Positive"
-  },
-  "ko-KR-SunHiNeural": {
-    "gender": "Female",
-    "desc": "General | Friendly, Positive"
-  },
-  "fr-BE-CharlineNeural": {
-    "gender": "Female",
-    "desc": "General | Friendly, Positive"
-  },
-  "fr-BE-GerardNeural": {
-    "gender": "Male",
-    "desc": "General | Friendly, Positive"
-  },
-  "fr-CA-AntoineNeural": {
-    "gender": "Male",
-    "desc": "General | Friendly, Positive"
-  },
-  "fr-CA-JeanNeural": {
-    "gender": "Male",
-    "desc": "General | Friendly, Positive"
-  },
-  "fr-CA-SylvieNeural": {
-    "gender": "Female",
-    "desc": "General | Friendly, Positive"
-  },
-  "fr-CA-ThierryNeural": {
-    "gender": "Male",
-    "desc": "General | Friendly, Positive"
-  },
-  "fr-CH-ArianeNeural": {
-    "gender": "Female",
-    "desc": "General | Friendly, Positive"
-  },
-  "fr-CH-FabriceNeural": {
-    "gender": "Male",
-    "desc": "General | Friendly, Positive"
-  },
-  "fr-FR-DeniseNeural": {
-    "gender": "Female",
-    "desc": "General | Friendly, Positive"
-  },
-  "fr-FR-EloiseNeural": {
-    "gender": "Female",
-    "desc": "General | Friendly, Positive"
-  },
-  "fr-FR-HenriNeural": {
-    "gender": "Male",
-    "desc": "General | Friendly, Positive"
-  },
-  "fr-FR-RemyMultilingualNeural": {
-    "gender": "Male",
-    "desc": "General | Friendly, Positive"
-  },
-  "fr-FR-VivienneMultilingualNeural": {
-    "gender": "Female",
-    "desc": "General | Friendly, Positive"
-  },
-  "it-IT-DiegoNeural": {
-    "gender": "Male",
-    "desc": "General | Friendly, Positive"
-  },
-  "it-IT-ElsaNeural": {
-    "gender": "Female",
-    "desc": "General | Friendly, Positive"
-  },
-  "it-IT-GiuseppeMultilingualNeural": {
-    "gender": "Male",
-    "desc": "General | Friendly, Positive"
-  },
-  "it-IT-IsabellaNeural": {
-    "gender": "Female",
-    "desc": "General | Friendly, Positive"
-  },
-  "es-AR-ElenaNeural": {
-    "gender": "Female",
-    "desc": "General | Friendly, Positive"
-  },
-  "es-AR-TomasNeural": {
-    "gender": "Male",
-    "desc": "General | Friendly, Positive"
-  },
-  "es-BO-MarceloNeural": {
-    "gender": "Male",
-    "desc": "General | Friendly, Positive"
-  },
-  "es-BO-SofiaNeural": {
-    "gender": "Female",
-    "desc": "General | Friendly, Positive"
-  },
-  "es-CL-CatalinaNeural": {
-    "gender": "Female",
-    "desc": "General | Friendly, Positive"
-  },
-  "es-CL-LorenzoNeural": {
-    "gender": "Male",
-    "desc": "General | Friendly, Positive"
-  },
-  "es-CO-GonzaloNeural": {
-    "gender": "Male",
-    "desc": "General | Friendly, Positive"
-  },
-  "es-CO-SalomeNeural": {
-    "gender": "Female",
-    "desc": "General | Friendly, Positive"
-  },
-  "es-CR-JuanNeural": {
-    "gender": "Male",
-    "desc": "General | Friendly, Positive"
-  },
-  "es-CR-MariaNeural": {
-    "gender": "Female",
-    "desc": "General | Friendly, Positive"
-  },
-  "es-CU-BelkysNeural": {
-    "gender": "Female",
-    "desc": "General | Friendly, Positive"
-  },
-  "es-CU-ManuelNeural": {
-    "gender": "Male",
-    "desc": "General | Friendly, Positive"
-  },
-  "es-DO-EmilioNeural": {
-    "gender": "Male",
-    "desc": "General | Friendly, Positive"
-  },
-  "es-DO-RamonaNeural": {
-    "gender": "Female",
-    "desc": "General | Friendly, Positive"
-  },
-  "es-EC-AndreaNeural": {
-    "gender": "Female",
-    "desc": "General | Friendly, Positive"
-  },
-  "es-EC-LuisNeural": {
-    "gender": "Male",
-    "desc": "General | Friendly, Positive"
-  },
-  "es-ES-AlvaroNeural": {
-    "gender": "Male",
-    "desc": "General | Friendly, Positive"
-  },
-  "es-ES-ElviraNeural": {
-    "gender": "Female",
-    "desc": "General | Friendly, Positive"
-  },
-  "es-ES-XimenaNeural": {
-    "gender": "Female",
-    "desc": "General | Friendly, Positive"
-  },
-  "es-GQ-JavierNeural": {
-    "gender": "Male",
-    "desc": "General | Friendly, Positive"
-  },
-  "es-GQ-TeresaNeural": {
-    "gender": "Female",
-    "desc": "General | Friendly, Positive"
-  },
-  "es-GT-AndresNeural": {
-    "gender": "Male",
-    "desc": "General | Friendly, Positive"
-  },
-  "es-GT-MartaNeural": {
-    "gender": "Female",
-    "desc": "General | Friendly, Positive"
-  },
-  "es-HN-CarlosNeural": {
-    "gender": "Male",
-    "desc": "General | Friendly, Positive"
-  },
-  "es-HN-KarlaNeural": {
-    "gender": "Female",
-    "desc": "General | Friendly, Positive"
-  },
-  "es-MX-DaliaNeural": {
-    "gender": "Female",
-    "desc": "General | Friendly, Positive"
-  },
-  "es-MX-JorgeNeural": {
-    "gender": "Male",
-    "desc": "General | Friendly, Positive"
-  },
-  "es-NI-FedericoNeural": {
-    "gender": "Male",
-    "desc": "General | Friendly, Positive"
-  },
-  "es-NI-YolandaNeural": {
-    "gender": "Female",
-    "desc": "General | Friendly, Positive"
-  },
-  "es-PA-MargaritaNeural": {
-    "gender": "Female",
-    "desc": "General | Friendly, Positive"
-  },
-  "es-PA-RobertoNeural": {
-    "gender": "Male",
-    "desc": "General | Friendly, Positive"
-  },
-  "es-PE-AlexNeural": {
-    "gender": "Male",
-    "desc": "General | Friendly, Positive"
-  },
-  "es-PE-CamilaNeural": {
-    "gender": "Female",
-    "desc": "General | Friendly, Positive"
-  },
-  "es-PR-KarinaNeural": {
-    "gender": "Female",
-    "desc": "General | Friendly, Positive"
-  },
-  "es-PR-VictorNeural": {
-    "gender": "Male",
-    "desc": "General | Friendly, Positive"
-  },
-  "es-PY-MarioNeural": {
-    "gender": "Male",
-    "desc": "General | Friendly, Positive"
-  },
-  "es-PY-TaniaNeural": {
-    "gender": "Female",
-    "desc": "General | Friendly, Positive"
-  },
-  "es-SV-LorenaNeural": {
-    "gender": "Female",
-    "desc": "General | Friendly, Positive"
-  },
-  "es-SV-RodrigoNeural": {
-    "gender": "Male",
-    "desc": "General | Friendly, Positive"
-  },
-  "es-US-AlonsoNeural": {
-    "gender": "Male",
-    "desc": "General | Friendly, Positive"
-  },
-  "es-US-PalomaNeural": {
-    "gender": "Female",
-    "desc": "General | Friendly, Positive"
-  },
-  "es-UY-MateoNeural": {
-    "gender": "Male",
-    "desc": "General | Friendly, Positive"
-  },
-  "es-UY-ValentinaNeural": {
-    "gender": "Female",
-    "desc": "General | Friendly, Positive"
-  },
-  "es-VE-PaolaNeural": {
-    "gender": "Female",
-    "desc": "General | Friendly, Positive"
-  },
-  "es-VE-SebastianNeural": {
-    "gender": "Male",
-    "desc": "General | Friendly, Positive"
-  },
-  "zh-CN-XiaoxiaoNeural": {
-    "gender": "Female",
-    "desc": "News, Novel | Warm"
-  },
-  "zh-CN-XiaoyiNeural": {
-    "gender": "Female",
-    "desc": "Cartoon, Novel | Lively"
-  },
-  "zh-CN-YunjianNeural": {
-    "gender": "Male",
-    "desc": "Sports, Novel | Passion"
-  },
-  "zh-CN-YunxiNeural": {
-    "gender": "Male",
-    "desc": "Novel | Lively, Sunshine"
-  },
-  "zh-CN-YunxiaNeural": {
-    "gender": "Male",
-    "desc": "Cartoon, Novel | Cute"
-  },
-  "zh-CN-YunyangNeural": {
-    "gender": "Male",
-    "desc": "News | Professional, Reliable"
-  },
-  "zh-CN-liaoning-XiaobeiNeural": {
-    "gender": "Female",
-    "desc": "Dialect | Humorous"
-  },
-  "zh-CN-shaanxi-XiaoniNeural": {
-    "gender": "Female",
-    "desc": "Dialect | Bright"
-  },
-  "zh-HK-HiuGaaiNeural": {
-    "gender": "Female",
-    "desc": "General | Friendly, Positive"
-  },
-  "zh-HK-HiuMaanNeural": {
-    "gender": "Female",
-    "desc": "General | Friendly, Positive"
-  },
-  "zh-HK-WanLungNeural": {
-    "gender": "Male",
-    "desc": "General | Friendly, Positive"
-  },
-  "zh-TW-HsiaoChenNeural": {
-    "gender": "Female",
-    "desc": "General | Friendly, Positive"
-  },
-  "zh-TW-HsiaoYuNeural": {
-    "gender": "Female",
-    "desc": "General | Friendly, Positive"
-  },
-  "zh-TW-YunJheNeural": {
-    "gender": "Male",
-    "desc": "General | Friendly, Positive"
-  }
+  "en-GB-LibbyNeural": {"gender": "Female", "desc": "英音 | 友好、积极"},
+  "en-GB-MaisieNeural": {"gender": "Female", "desc": "英音 | 友好、积极"},
+  "en-GB-RyanNeural": {"gender": "Male", "desc": "英音 | 友好、积极"},
+  "en-GB-SoniaNeural": {"gender": "Female", "desc": "英音 | 友好、积极"},
+  "en-GB-ThomasNeural": {"gender": "Male", "desc": "英音 | 友好、积极"},
+  "en-US-AnaNeural": {"gender": "Female", "desc": "美音 | 可爱，会话"},
+  "en-US-AndrewMultilingualNeural": {"gender": "Male", "desc": "美音 | 温暖、自信、真实"},
+  "en-US-AndrewNeural": {"gender": "Male", "desc": "美音 | 温暖、自信、真实"},
+  "en-US-AriaNeural": {"gender": "Female", "desc": "美音 | 积极、自信"},
+  "en-US-AvaMultilingualNeural": {"gender": "Female", "desc": "美音 | 富有表现力、关怀、愉悦"},
+  "en-US-AvaNeural": {"gender": "Female", "desc": "美音 | 富有表现力、关怀、愉悦"},
+  "en-US-BrianMultilingualNeural": {"gender": "Male", "desc": "美音 | 平易近人、随性、真诚"},
+  "en-US-BrianNeural": {"gender": "Male", "desc": "美音 | 平易近人、随性、真诚"},
+  "en-US-ChristopherNeural": {"gender": "Male", "desc": "美音 | 可靠、权威"},
+  "en-US-EmmaMultilingualNeural": {"gender": "Female", "desc": "美音 | 愉快、清晰、对话感"},
+  "en-US-EmmaNeural": {"gender": "Female", "desc": "美音 | 愉快、清晰、对话感"},
+  "en-US-EricNeural": {"gender": "Male", "desc": "美音 | 理性"},
+  "en-US-GuyNeural": {"gender": "Male", "desc": "美音 | 热情"},
+  "en-US-JennyNeural": {"gender": "Female", "desc": "美音 | 友好、体贴、舒适"},
+  "en-US-MichelleNeural": {"gender": "Female", "desc": "美音 | 友好、愉悦"},
+  "en-US-RogerNeural": {"gender": "Male", "desc": "美音 | 活泼"},
+  "en-US-SteffanNeural": {"gender": "Male", "desc": "美音 | 理性"},
+  "en-AU-NatashaNeural": {"gender": "Female", "desc": "澳音 | 友好、积极"},
+  "en-AU-WilliamMultilingualNeural": {"gender": "Male", "desc": "澳音 | 友好、积极"},
+  "en-CA-ClaraNeural": {"gender": "Female", "desc": "加音 | 友好、积极"},
+  "en-CA-LiamNeural": {"gender": "Male", "desc": "加音 | 友好、积极"},
+  "en-HK-SamNeural": {"gender": "Male", "desc": "港音 | 友好、积极"},
+  "en-HK-YanNeural": {"gender": "Female", "desc": "港音 | 友好、积极"},
+  "en-IE-ConnorNeural": {"gender": "Male", "desc": "爱尔兰音 | 友好、积极"},
+  "en-IE-EmilyNeural": {"gender": "Female", "desc": "爱尔兰音 | 友好、积极"},
+  "en-IN-NeerjaExpressiveNeural": {"gender": "Female", "desc": "印音 | 友好、积极"},
+  "en-IN-NeerjaNeural": {"gender": "Female", "desc": "印音 | 友好、积极"},
+  "en-IN-PrabhatNeural": {"gender": "Male", "desc": "印音 | 友好、积极"},
+  "en-KE-AsiliaNeural": {"gender": "Female", "desc": "肯尼亚音 | 友好、积极"},
+  "en-KE-ChilembaNeural": {"gender": "Male", "desc": "肯尼亚音 | 友好、积极"},
+  "en-NG-AbeoNeural": {"gender": "Male", "desc": "尼日利亚音 | 友好、积极"},
+  "en-NG-EzinneNeural": {"gender": "Female", "desc": "尼日利亚音 | 友好、积极"},
+  "en-NZ-MitchellNeural": {"gender": "Male", "desc": "新西兰音 | 友好、积极"},
+  "en-NZ-MollyNeural": {"gender": "Female", "desc": "新西兰音 | 友好、积极"},
+  "en-PH-JamesNeural": {"gender": "Male", "desc": "菲律宾音 | 友好、积极"},
+  "en-PH-RosaNeural": {"gender": "Female", "desc": "菲律宾音 | 友好、积极"},
+  "en-SG-LunaNeural": {"gender": "Female", "desc": "新加坡音 | 友好、积极"},
+  "en-SG-WayneNeural": {"gender": "Male", "desc": "新加坡音 | 友好、积极"},
+  "en-TZ-ElimuNeural": {"gender": "Male", "desc": "坦桑尼亚音 | 友好、积极"},
+  "en-TZ-ImaniNeural": {"gender": "Female", "desc": "坦桑尼亚音 | 友好、积极"},
+  "en-ZA-LeahNeural": {"gender": "Female", "desc": "南非音 | 友好、积极"},
+  "en-ZA-LukeNeural": {"gender": "Male", "desc": "南非音 | 友好、积极"},
+  "es-AR-ElenaNeural": {"gender": "Female", "desc": "阿根廷音 | 友好、积极"},
+  "es-AR-TomasNeural": {"gender": "Male", "desc": "阿根廷音 | 友好、积极"},
+  "es-BO-MarceloNeural": {"gender": "Male", "desc": "玻利维亚音 | 友好、积极"},
+  "es-BO-SofiaNeural": {"gender": "Female", "desc": "玻利维亚音 | 友好、积极"},
+  "es-CL-CatalinaNeural": {"gender": "Female", "desc": "智利音 | 友好、积极"},
+  "es-CL-LorenzoNeural": {"gender": "Male", "desc": "智利音 | 友好、积极"},
+  "es-CO-GonzaloNeural": {"gender": "Male", "desc": "哥伦比亚音 | 友好、积极"},
+  "es-CO-SalomeNeural": {"gender": "Female", "desc": "哥伦比亚音 | 友好、积极"},
+  "es-CR-JuanNeural": {"gender": "Male", "desc": "哥斯达黎加音 | 友好、积极"},
+  "es-CR-MariaNeural": {"gender": "Female", "desc": "哥斯达黎加音 | 友好、积极"},
+  "es-CU-BelkysNeural": {"gender": "Female", "desc": "古巴音 | 友好、积极"},
+  "es-CU-ManuelNeural": {"gender": "Male", "desc": "古巴音 | 友好、积极"},
+  "es-DO-EmilioNeural": {"gender": "Male", "desc": "多米尼加音 | 友好、积极"},
+  "es-DO-RamonaNeural": {"gender": "Female", "desc": "多米尼加音 | 友好、积极"},
+  "es-EC-AndreaNeural": {"gender": "Female", "desc": "厄瓜多尔音 | 友好、积极"},
+  "es-EC-LuisNeural": {"gender": "Male", "desc": "厄瓜多尔音 | 友好、积极"},
+  "es-ES-AlvaroNeural": {"gender": "Male", "desc": "西音 | 友好、积极"},
+  "es-ES-ElviraNeural": {"gender": "Female", "desc": "西音 | 友好、积极"},
+  "es-ES-XimenaNeural": {"gender": "Female", "desc": "西音 | 友好、积极"},
+  "es-GQ-JavierNeural": {"gender": "Male", "desc": "赤道几内亚音 | 友好、积极"},
+  "es-GQ-TeresaNeural": {"gender": "Female", "desc": "赤道几内亚音 | 友好、积极"},
+  "es-GT-AndresNeural": {"gender": "Male", "desc": "危地马拉音 | 友好、积极"},
+  "es-GT-MartaNeural": {"gender": "Female", "desc": "危地马拉音 | 友好、积极"},
+  "es-HN-CarlosNeural": {"gender": "Male", "desc": "洪都拉斯音 | 友好、积极"},
+  "es-HN-KarlaNeural": {"gender": "Female", "desc": "洪都拉斯音 | 友好、积极"},
+  "es-MX-DaliaNeural": {"gender": "Female", "desc": "墨音 | 友好、积极"},
+  "es-MX-JorgeNeural": {"gender": "Male", "desc": "墨音 | 友好、积极"},
+  "es-NI-FedericoNeural": {"gender": "Male", "desc": "尼加拉瓜音 | 友好、积极"},
+  "es-NI-YolandaNeural": {"gender": "Female", "desc": "尼加拉瓜音 | 友好、积极"},
+  "es-PA-MargaritaNeural": {"gender": "Female", "desc": "巴拿马音 | 友好、积极"},
+  "es-PA-RobertoNeural": {"gender": "Male", "desc": "巴拿马音 | 友好、积极"},
+  "es-PE-AlexNeural": {"gender": "Male", "desc": "秘鲁音 | 友好、积极"},
+  "es-PE-CamilaNeural": {"gender": "Female", "desc": "秘鲁音 | 友好、积极"},
+  "es-PR-KarinaNeural": {"gender": "Female", "desc": "波多黎各音 | 友好、积极"},
+  "es-PR-VictorNeural": {"gender": "Male", "desc": "波多黎各音 | 友好、积极"},
+  "es-PY-MarioNeural": {"gender": "Male", "desc": "巴拉圭音 | 友好、积极"},
+  "es-PY-TaniaNeural": {"gender": "Female", "desc": "巴拉圭音 | 友好、积极"},
+  "es-SV-LorenaNeural": {"gender": "Female", "desc": "萨尔瓦多音 | 友好、积极"},
+  "es-SV-RodrigoNeural": {"gender": "Male", "desc": "萨尔瓦多音 | 友好、积极"},
+  "es-US-AlonsoNeural": {"gender": "Male", "desc": "美式西音 | 友好、积极"},
+  "es-US-PalomaNeural": {"gender": "Female", "desc": "美式西音 | 友好、积极"},
+  "es-UY-MateoNeural": {"gender": "Male", "desc": "乌拉圭音 | 友好、积极"},
+  "es-UY-ValentinaNeural": {"gender": "Female", "desc": "乌拉圭音 | 友好、积极"},
+  "es-VE-PaolaNeural": {"gender": "Female", "desc": "委内瑞拉音 | 友好、积极"},
+  "es-VE-SebastianNeural": {"gender": "Male", "desc": "委内瑞拉音 | 友好、积极"},
+  "fr-BE-CharlineNeural": {"gender": "Female", "desc": "比利时音 | 友好、积极"},
+  "fr-BE-GerardNeural": {"gender": "Male", "desc": "比利时音 | 友好、积极"},
+  "fr-CA-AntoineNeural": {"gender": "Male", "desc": "加音 | 友好、积极"},
+  "fr-CA-JeanNeural": {"gender": "Male", "desc": "加音 | 友好、积极"},
+  "fr-CA-SylvieNeural": {"gender": "Female", "desc": "加音 | 友好、积极"},
+  "fr-CA-ThierryNeural": {"gender": "Male", "desc": "加音 | 友好、积极"},
+  "fr-CH-ArianeNeural": {"gender": "Female", "desc": "瑞士音 | 友好、积极"},
+  "fr-CH-FabriceNeural": {"gender": "Male", "desc": "瑞士音 | 友好、积极"},
+  "fr-FR-DeniseNeural": {"gender": "Female", "desc": "法音 | 友好、积极"},
+  "fr-FR-EloiseNeural": {"gender": "Female", "desc": "法音 | 友好、积极"},
+  "fr-FR-HenriNeural": {"gender": "Male", "desc": "法音 | 友好、积极"},
+  "fr-FR-RemyMultilingualNeural": {"gender": "Male", "desc": "法音 | 友好、积极"},
+  "fr-FR-VivienneMultilingualNeural": {"gender": "Female", "desc": "法音 | 友好、积极"},
+  "it-IT-DiegoNeural": {"gender": "Male", "desc": "意音 | 友好、积极"},
+  "it-IT-ElsaNeural": {"gender": "Female", "desc": "意音 | 友好、积极"},
+  "it-IT-GiuseppeMultilingualNeural": {"gender": "Male", "desc": "意音 | 友好、积极"},
+  "it-IT-IsabellaNeural": {"gender": "Female", "desc": "意音 | 友好、积极"},
+  "ja-JP-KeitaNeural": {"gender": "Male", "desc": "日音 | 友好、积极"},
+  "ja-JP-NanamiNeural": {"gender": "Female", "desc": "日音 | 友好、积极"},
+  "ko-KR-HyunsuMultilingualNeural": {"gender": "Male", "desc": "韩音 | 友好、积极"},
+  "ko-KR-InJoonNeural": {"gender": "Male", "desc": "韩音 | 友好、积极"},
+  "ko-KR-SunHiNeural": {"gender": "Female", "desc": "韩音 | 友好、积极"},
+  "zh-CN-XiaoxiaoNeural": {"gender": "Female", "desc": "新闻、小说 | 温暖"},
+  "zh-CN-XiaoyiNeural": {"gender": "Female", "desc": "动画、小说 | 活泼"},
+  "zh-CN-YunjianNeural": {"gender": "Male", "desc": "体育、小说 | 激情"},
+  "zh-CN-YunxiNeural": {"gender": "Male", "desc": "小说 | 阳光、活泼"},
+  "zh-CN-YunxiaNeural": {"gender": "Male", "desc": "动画、小说 | 可爱"},
+  "zh-CN-YunyangNeural": {"gender": "Male", "desc": "新闻 | 专业、可靠"},
+  "zh-CN-liaoning-XiaobeiNeural": {"gender": "Female", "desc": "方言 | 东北、幽默"},
+  "zh-CN-shaanxi-XiaoniNeural": {"gender": "Female", "desc": "方言 | 陕西、明快"},
+  "zh-HK-HiuGaaiNeural": {"gender": "Female", "desc": "粤语 | 友好、积极"},
+  "zh-HK-HiuMaanNeural": {"gender": "Female", "desc": "粤语 | 友好、积极"},
+  "zh-HK-WanLungNeural": {"gender": "Male", "desc": "粤语 | 友好、积极"},
+  "zh-TW-HsiaoChenNeural": {"gender": "Female", "desc": "台音 | 友好、积极"},
+  "zh-TW-HsiaoYuNeural": {"gender": "Female", "desc": "台音 | 友好、积极"},
+  "zh-TW-YunJheNeural": {"gender": "Male", "desc": "台音 | 友好、积极"}
 }
