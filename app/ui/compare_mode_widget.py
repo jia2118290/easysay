@@ -573,8 +573,8 @@ def _get_score_color(score: float) -> str:
 
 def _word_span(word: str, accuracy: float, error_type: str) -> str:
     if error_type == "None" or not error_type:
-        # 发音准确：白色
-        return f'<span style="color:#F2F1EE;">{word}</span>'
+        # 发音准确：绿色
+        return f'<span style="color:#4ADE80;">{word}</span>'
 
     if accuracy >= 80:
         c = "#F59E0B"
