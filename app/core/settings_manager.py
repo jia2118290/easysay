@@ -14,7 +14,7 @@ from app.config import SETTINGS_FILE_PATH
 _DEFAULTS: Dict[str, Any] = {
     "last_output_dir": "",
     "last_lang": "请选择",
-    "last_rate": "+0%",
+    "last_rate": "-10%",
     "last_filename": "audio",
     "last_pause": "无停顿",
     "azure_speech_key": "",

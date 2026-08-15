@@ -165,7 +165,7 @@ class MainWindow(QMainWindow):
         self.voice_combo.addItems([PLACEHOLDER])
         self.voice_combo.setEnabled(False)
 
-        self.rate_edit = QLineEdit("+0%")
+        self.rate_edit = QLineEdit("-10%")
         self.rate_edit.setObjectName("rateEdit")
         self.rate_edit.setFixedWidth(90)
         self.rate_edit.setToolTip("语速调整范围：-50% ~ +50%，例如 +10% 或 -20%")
@@ -323,8 +323,11 @@ class MainWindow(QMainWindow):
             if idx >= 0:
                 self.lang_combo.setCurrentIndex(idx)
 
-        self.rate_edit.setText(self.settings.get("last_rate"))
-        self.fname_edit.setText(self.settings.get("last_filename"))
+        rate = self.settings.get("last_rate")
+        if isinstance(rate, (int, float)):
+            rate = f"{rate:+g}%"
+        self.rate_edit.setText(str(rate or "-10%"))
+        self.fname_edit.setText(str(self.settings.get("last_filename") or "audio"))
 
         last_pause = self.settings.get("last_pause")
         if last_pause:
