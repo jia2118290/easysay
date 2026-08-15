@@ -3,17 +3,32 @@ import json
 
 from PySide6.QtCore import QThread, Signal
 
+# UI 语言标签 -> Azure 发音评测 BCP-47 区域码
+AZURE_LANG_MAP = {
+    "英语 (en)": "en-US",
+    "日语 (ja)": "ja-JP",
+    "韩语 (ko)": "ko-KR",
+    "法语 (fr)": "fr-FR",
+    "意大利语 (it)": "it-IT",
+    "西班牙语 (es)": "es-ES",
+    "中文 (zh)": "zh-CN",
+}
+
+# 未显式指定时的默认评测语言
+DEFAULT_AZURE_LANG = "en-US"
+
 
 class PronunciationWorker(QThread):
     finished_signal = Signal(bool, dict)  # (success, scores_or_error_dict)
 
     def __init__(self, wav_path: str, reference_text: str,
-                 speech_key: str, speech_region: str):
+                 speech_key: str, speech_region: str, language: str = ""):
         super().__init__()
         self.wav_path = wav_path
         self.reference_text = reference_text
         self.speech_key = speech_key
         self.speech_region = speech_region
+        self.language = language
 
     def run(self):
         # 参考文本为空 → 前端应该在调用前校验，这里也兜个底
@@ -37,6 +52,9 @@ class PronunciationWorker(QThread):
         try:
             speech_config = speechsdk.SpeechConfig(
                 subscription=self.speech_key, region=self.speech_region,
+            )
+            speech_config.speech_recognition_language = AZURE_LANG_MAP.get(
+                self.language, DEFAULT_AZURE_LANG
             )
             audio_config = speechsdk.audio.AudioConfig(filename=self.wav_path)
             recognizer = speechsdk.SpeechRecognizer(

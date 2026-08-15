@@ -413,7 +413,9 @@ class CompareModeWidget(QWidget):
         key = self.settings.get("azure_speech_key") or ""
         region = self.settings.get("azure_speech_region") or ""
 
-        self._pron_worker = PronunciationWorker(self._wav_tmp, sentence, key, region)
+        self._pron_worker = PronunciationWorker(
+            self._wav_tmp, sentence, key, region, language=self._voice_lang
+        )
         self._pron_worker.finished_signal.connect(self._on_scoring_done)
         self._pron_worker.start()
 
