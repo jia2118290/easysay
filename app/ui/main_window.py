@@ -136,7 +136,7 @@ class MainWindow(QMainWindow):
 
         # --- 标签页 2：对比读 ---
         self.compare_widget = CompareModeWidget(media_player=self._media_player, parent=self)
-        self.tab_widget.addTab(self.compare_widget, "Azure对比读")
+        self.tab_widget.addTab(self.compare_widget, "对比读")
 
         layout.addWidget(self.tab_widget, stretch=1)
         layout.addWidget(self.copyright_label())
