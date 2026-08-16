@@ -504,10 +504,10 @@ class MainWindow(QMainWindow):
         lang = self.lang_combo.currentText()
         voice = self._get_selected_voice()
         if lang == PLACEHOLDER:
-            self._show_error(self.voice_error_label, "请先选择语言")
+            QMessageBox.warning(self, "提示", "请先选择语言")
             return
         if voice == PLACEHOLDER:
-            self._show_error(self.voice_error_label, "请先筛选并选择音色")
+            QMessageBox.warning(self, "提示", "请先筛选并选择音色")
             return
 
         preview_text = _PREVIEW_TEXTS.get(lang, _PREVIEW_TEXTS["中文 (zh)"])
