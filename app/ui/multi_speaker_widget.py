@@ -290,7 +290,7 @@ class MultiSpeakerWidget(QWidget):
         self.script_edit = LineNumberTextEdit()
         self.script_edit.setObjectName("dialogueScriptEdit")
         self.script_edit.setPlaceholderText(
-            "\n 样例：\n Johnny: Hi everyone, I'm Johnny, welcome!\n Crystal: Hi Johnny, oh my god! You're my dream guy!\n Tina: Hi Johnny,oh my god! You’re my crush."
+            "\n Johnny: Hi everyone, I'm Johnny, welcome!\n Crystal: Hi Johnny, oh my god! You're my dream guy!\n Tina: Hi Johnny,oh my god! You’re my crush."
         )
         self.script_edit.textChanged.connect(self._on_script_changed)
         self.script_edit.installEventFilter(self)

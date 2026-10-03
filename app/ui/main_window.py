@@ -143,7 +143,7 @@ class MainWindow(QMainWindow):
         self.multi_speaker_widget = MultiSpeakerWidget(
             media_player=self._media_player, parent=self
         )
-        self.tab_widget.addTab(self.multi_speaker_widget, "多人对话")
+        self.tab_widget.addTab(self.multi_speaker_widget, "多人对话文本转语音")
 
         layout.addWidget(self.tab_widget, stretch=1)
         layout.addWidget(self.copyright_label())
