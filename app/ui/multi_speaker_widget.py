@@ -284,13 +284,13 @@ class MultiSpeakerWidget(QWidget):
         layout = QVBoxLayout(card)
         layout.setSpacing(8)
 
-        hint = QLabel("每行一条台词，格式：角色名：台词 或 角色名:台词")
+        hint = QLabel("每行一个说话人的台词，格式：  角色名：台词")
         hint.setObjectName("charCountLabel")
 
         self.script_edit = LineNumberTextEdit()
         self.script_edit.setObjectName("dialogueScriptEdit")
         self.script_edit.setPlaceholderText(
-            "\n Johnny: Hi everyone, I'm Johnny, welcome!\n Crystal: Hi Johnny, oh my god! You're my dream guy!\n Tina: Hi Johnny,oh my god! You’re my crush."
+            "\n 样例：\n Johnny: Hi everyone, I'm Johnny, welcome!\n Crystal: Hi Johnny, oh my god! You're my dream guy!\n Tina: Hi Johnny,oh my god! You’re my crush."
         )
         self.script_edit.textChanged.connect(self._on_script_changed)
         self.script_edit.installEventFilter(self)
@@ -331,7 +331,7 @@ class MultiSpeakerWidget(QWidget):
 
         fname_row = QHBoxLayout()
         self.fname_edit = QLineEdit()
-        self.fname_edit.setPlaceholderText("每次生成后清空，请输入文件名（如 dialogue）")
+        self.fname_edit.setPlaceholderText("请输入文件名")
         self.rate_edit = QLineEdit("-10%")
         self.rate_edit.setObjectName("rateEdit")
         self.rate_edit.setFixedWidth(80)
