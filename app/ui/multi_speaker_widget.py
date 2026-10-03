@@ -290,7 +290,7 @@ class MultiSpeakerWidget(QWidget):
         self.script_edit = LineNumberTextEdit()
         self.script_edit.setObjectName("dialogueScriptEdit")
         self.script_edit.setPlaceholderText(
-            "\n Johnny: Hi everyone, welcome!\n Crystal: Hi Johnny, oh my god! You're my dream guy!\n Tina: Hi Johnny,oh my god! You’re my crush."
+            "\n Johnny: Hi everyone, I'm Johnny, welcome!\n Crystal: Hi Johnny, oh my god! You're my dream guy!\n Tina: Hi Johnny,oh my god! You’re my crush."
         )
         self.script_edit.textChanged.connect(self._on_script_changed)
         self.script_edit.installEventFilter(self)
@@ -330,13 +330,15 @@ class MultiSpeakerWidget(QWidget):
         layout.addLayout(dir_row)
 
         fname_row = QHBoxLayout()
-        self.fname_edit = QLineEdit("dialogue")
+        self.fname_edit = QLineEdit()
+        self.fname_edit.setPlaceholderText("每次生成后清空，请输入文件名（如 dialogue）")
         self.rate_edit = QLineEdit("-10%")
         self.rate_edit.setObjectName("rateEdit")
         self.rate_edit.setFixedWidth(80)
         self.pause_combo = QComboBox()
         self.pause_combo.addItems(["无停顿"] + [f"{i}秒" for i in range(1, 7)])
         self.pause_combo.setFixedWidth(80)
+        self.pause_combo.setCurrentIndex(1)  # 默认行间停顿 1 秒
         fname_row.addWidget(QLabel("文件名"))
         fname_row.addWidget(self.fname_edit, stretch=1)
         fname_row.addWidget(QLabel("语速"))
@@ -559,6 +561,7 @@ class MultiSpeakerWidget(QWidget):
 
         self._last_generated_path = full_path
         self._set_generating(True)
+        self.fname_edit.clear()
 
         self._worker = MultiSpeakerWorker(payload, full_path, pause_seconds)
         self._worker.progress_signal.connect(self._on_progress)
