@@ -22,6 +22,7 @@ from app.core.voice_repository import VoiceRepository
 from app.ui.about_dialog import AboutDialog
 from app.ui.equalizer_widget import EqualizerWidget
 from app.ui.compare_mode_widget import CompareModeWidget
+from app.ui.multi_speaker_widget import MultiSpeakerWidget
 from app.ui.line_number_edit import LineNumberTextEdit
 
 PLACEHOLDER = "请选择"
@@ -137,6 +138,12 @@ class MainWindow(QMainWindow):
         # --- 标签页 2：对比读 ---
         self.compare_widget = CompareModeWidget(media_player=self._media_player, parent=self)
         self.tab_widget.addTab(self.compare_widget, "对比读")
+
+        # --- 标签页 3：多人对话 ---
+        self.multi_speaker_widget = MultiSpeakerWidget(
+            media_player=self._media_player, parent=self
+        )
+        self.tab_widget.addTab(self.multi_speaker_widget, "多人对话")
 
         layout.addWidget(self.tab_widget, stretch=1)
         layout.addWidget(self.copyright_label())
@@ -485,9 +492,13 @@ class MainWindow(QMainWindow):
             # 切换到"文本转语音"
             if self.compare_widget:
                 self.compare_widget.abort_flow()
-        else:
+        elif index == 1:
             # 切换到"对比读" — 同步当前音色参数
             self._sync_voice_to_compare()
+            if self.worker and self.worker.isRunning():
+                self._cancel_generation()
+        else:
+            # 切换到"多人对话"
             if self.worker and self.worker.isRunning():
                 self._cancel_generation()
 
@@ -535,6 +546,8 @@ class MainWindow(QMainWindow):
         self._persist_settings()
         if self.compare_widget:
             self.compare_widget.abort_flow()
+        if self.multi_speaker_widget:
+            self.multi_speaker_widget.abort_flow()
         if self.worker and self.worker.isRunning():
             self.worker.cancel()
             self.worker.wait(3000)
@@ -633,7 +646,9 @@ class MainWindow(QMainWindow):
             self.equalizer.stop()
 
     def _on_progress(self, percent: int):
-        self.status_label.setText(f"正在生成音频...{percent}%")
+        self.status_label.setText(
+            f'正在生成音频...<span style="color:#E8A33D; font-weight:600;">{percent}%</span>'
+        )
 
     def on_complete(self, success: bool, msg: str):
         self._set_generating_state(False)

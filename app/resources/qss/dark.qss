@@ -353,3 +353,52 @@ QTabBar::tab:hover:!selected {
     color: #F2F1EE;
     background-color: #2C2F37;
 }
+
+/* ---------- 多人对话：说话人卡片 ---------- */
+QGroupBox[speakerCard="true"] {
+    border: 1px solid #3A3D46;
+    border-radius: 8px;
+    margin-top: 12px;
+    padding: 12px 10px 10px 10px;
+}
+QGroupBox[speakerCard="true"]::title {
+    subcontrol-origin: margin;
+    subcontrol-position: top left;
+    left: 12px;
+    top: -2px;
+    padding: 0 6px;
+    font-weight: 600;
+    font-size: 10pt;
+    color: #9C9FA8;
+    background-color: #1B1D22;
+}
+
+QLineEdit#speakerNameEdit {
+    font-weight: 600;
+    color: #F2F1EE;
+}
+
+QPushButton#removeSpeakerButton {
+    background-color: transparent;
+    color: #6C6F78;
+    border: 1px solid #3A3D46;
+    border-radius: 6px;
+    padding: 4px 0;
+}
+QPushButton#removeSpeakerButton:hover {
+    border-color: #E5484D;
+    color: #E5484D;
+    background-color: rgba(229, 72, 77, 0.08);
+}
+
+/* ---------- 多人对话：脚本编辑区 ---------- */
+QTextEdit#dialogueScriptEdit, QPlainTextEdit#dialogueScriptEdit {
+    background-color: #2C2F37;
+    border: 1px solid #3A3D46;
+    border-radius: 6px;
+    font-size: 12pt;
+    font-family: "JetBrains Mono", "Cascadia Mono", "SF Mono", "Consolas", monospace;
+}
+QTextEdit#dialogueScriptEdit:focus, QPlainTextEdit#dialogueScriptEdit:focus {
+    border: 1px solid #E8A33D;
+}
