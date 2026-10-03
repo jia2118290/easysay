@@ -335,16 +335,27 @@ class MultiSpeakerWidget(QWidget):
         self.rate_edit = QLineEdit("-10%")
         self.rate_edit.setObjectName("rateEdit")
         self.rate_edit.setFixedWidth(80)
-        self.pause_combo = QComboBox()
-        self.pause_combo.addItems(["无停顿"] + [f"{i}秒" for i in range(1, 7)])
-        self.pause_combo.setFixedWidth(80)
-        self.pause_combo.setCurrentIndex(1)  # 默认行间停顿 1 秒
+
+        self.punct_pause_combo = QComboBox()
+        self.punct_pause_combo.addItems(["无停顿"] + [f"{i}秒" for i in range(1, 7)])
+        self.punct_pause_combo.setFixedWidth(80)
+        self.punct_pause_combo.setCurrentIndex(1)  # 默认标点停顿 1 秒
+        self.punct_pause_combo.setToolTip("每个标点符号（，。！？等）处插入静音")
+
+        self.line_pause_combo = QComboBox()
+        self.line_pause_combo.addItems(["无停顿"] + [f"{i}秒" for i in range(1, 7)])
+        self.line_pause_combo.setFixedWidth(80)
+        self.line_pause_combo.setCurrentIndex(1)  # 默认换行停顿 1 秒
+        self.line_pause_combo.setToolTip("每条台词（换行）之间插入静音")
+
         fname_row.addWidget(QLabel("文件名"))
         fname_row.addWidget(self.fname_edit, stretch=1)
         fname_row.addWidget(QLabel("语速"))
         fname_row.addWidget(self.rate_edit)
-        fname_row.addWidget(QLabel("行间停顿"))
-        fname_row.addWidget(self.pause_combo)
+        fname_row.addWidget(QLabel("标点停顿"))
+        fname_row.addWidget(self.punct_pause_combo)
+        fname_row.addWidget(QLabel("换行停顿"))
+        fname_row.addWidget(self.line_pause_combo)
         layout.addLayout(fname_row)
         return card
 
@@ -557,13 +568,16 @@ class MultiSpeakerWidget(QWidget):
             }
             for speaker, text in lines
         ]
-        pause_seconds = self._parse_pause_seconds()
+        punct_pause = self._parse_pause_seconds(self.punct_pause_combo)
+        line_pause = self._parse_pause_seconds(self.line_pause_combo)
 
         self._last_generated_path = full_path
         self._set_generating(True)
         self.fname_edit.clear()
 
-        self._worker = MultiSpeakerWorker(payload, full_path, pause_seconds)
+        self._worker = MultiSpeakerWorker(
+            payload, full_path, punct_pause, line_pause
+        )
         self._worker.progress_signal.connect(self._on_progress)
         self._worker.finished_signal.connect(self._on_complete)
         self._worker.start()
@@ -571,8 +585,8 @@ class MultiSpeakerWidget(QWidget):
         self.settings.set("last_output_dir", out_dir)
         self.settings.save()
 
-    def _parse_pause_seconds(self) -> int:
-        t = self.pause_combo.currentText()
+    def _parse_pause_seconds(self, combo) -> int:
+        t = combo.currentText()
         return 0 if t == "无停顿" else int(t[0])
 
     def _cancel(self):

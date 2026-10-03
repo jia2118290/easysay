@@ -5,6 +5,7 @@
 """
 import asyncio
 import os
+import re
 import tempfile
 
 import edge_tts
@@ -14,6 +15,8 @@ from PySide6.QtCore import QThread, Signal
 from app.config import ffmpeg_path
 
 AudioSegment.converter = ffmpeg_path()
+
+_SPLIT_PUNCTUATION = re.compile(r'([，。！？；：、,.;:!?])')
 
 
 def _ensure_ffmpeg_env() -> None:
@@ -31,14 +34,18 @@ class MultiSpeakerWorker(QThread):
     finished_signal = Signal(bool, str)
     progress_signal = Signal(int)
 
-    def __init__(self, lines: list[dict], save_path: str, pause_seconds: int = 0):
+    def __init__(self, lines: list[dict], save_path: str,
+                 punct_pause_seconds: int = 0, line_pause_seconds: int = 0):
         """
         lines: [{"speaker": 角色名, "text": 台词, "voice": 音色, "rate": 语速}, ...]
+        punct_pause_seconds: 标点处插入的静音秒数
+        line_pause_seconds: 换行（台词）之间的静音秒数
         """
         super().__init__()
         self.lines = lines
         self.save_path = save_path
-        self.pause_seconds = pause_seconds
+        self.punct_pause_seconds = punct_pause_seconds
+        self.line_pause_seconds = line_pause_seconds
         self._cancelled = False
 
     def cancel(self):
@@ -64,7 +71,8 @@ class MultiSpeakerWorker(QThread):
 
     async def _synthesize(self):
         total = len(self.lines)
-        silence = AudioSegment.silent(duration=self.pause_seconds * 1000)
+        punct_silence = AudioSegment.silent(duration=self.punct_pause_seconds * 1000)
+        line_silence = AudioSegment.silent(duration=self.line_pause_seconds * 1000)
         merged: AudioSegment | None = None
         tmp_files: list[str] = []
 
@@ -76,12 +84,26 @@ class MultiSpeakerWorker(QThread):
                 if not text:
                     self.progress_signal.emit(int((i + 1) / total * 99))
                     continue
-                seg = await self._tts_to_segment(
-                    text, line["voice"], line["rate"], tmp_files
-                )
-                merged = seg if merged is None else merged + seg
-                if i < total - 1 and self.pause_seconds > 0:
-                    merged = merged + silence
+
+                if self.punct_pause_seconds > 0:
+                    chunks = _split_by_punctuation(text)
+                    for j, chunk in enumerate(chunks):
+                        if self._cancelled:
+                            return
+                        seg = await self._tts_to_segment(
+                            chunk, line["voice"], line["rate"], tmp_files
+                        )
+                        merged = seg if merged is None else merged + seg
+                        if j < len(chunks) - 1:
+                            merged = merged + punct_silence
+                else:
+                    seg = await self._tts_to_segment(
+                        text, line["voice"], line["rate"], tmp_files
+                    )
+                    merged = seg if merged is None else merged + seg
+
+                if i < total - 1 and self.line_pause_seconds > 0:
+                    merged = merged + line_silence
                 self.progress_signal.emit(int((i + 1) / total * 99))
 
             if self._cancelled:
@@ -106,3 +128,18 @@ class MultiSpeakerWorker(QThread):
         communicate = edge_tts.Communicate(text, voice, rate=rate)
         await communicate.save(tmp.name)
         return AudioSegment.from_mp3(tmp.name)
+
+
+def _split_by_punctuation(text: str) -> list[str]:
+    """按标点把台词切成若干小段，段与段之间插入静音，模拟自然停顿。"""
+    segments = [s for s in _SPLIT_PUNCTUATION.split(text) if s]
+    chunks: list[str] = []
+    buf = ""
+    for s in segments:
+        buf += s
+        if len(s) == 1 and s in "，。！？；：、,.;:!?":
+            chunks.append(buf)
+            buf = ""
+    if buf.strip():
+        chunks.append(buf)
+    return chunks
